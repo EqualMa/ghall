@@ -10,6 +10,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "got": "^11.6.0",
+    "http-status-codes": "^2.1.2",
     "next": "9.5.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
