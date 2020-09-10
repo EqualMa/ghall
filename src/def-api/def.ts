@@ -10,7 +10,7 @@ export class MethodNotAllowedError extends AppError {
   constructor(
     //
     public receivedMethod: string,
-    public allowedMethods: string[]
+    public allowedMethods: string[],
   ) {
     super(`HTTP request method ${receivedMethod} not allowed`);
   }
@@ -39,7 +39,7 @@ export class ApiRequestWithUtil<
       method: T["MethodType"];
       query: T["QueryType"];
       body: T["BodyType"];
-    }
+    },
   ) {
     this.method = meta.method;
     this.query = meta.query;
@@ -49,7 +49,7 @@ export class ApiRequestWithUtil<
 
 function validateRequestMethod<M extends string>(
   method: string | undefined,
-  allowedMethods?: M | M[]
+  allowedMethods?: M | M[],
 ): M {
   if (
     allowedMethods &&
@@ -61,7 +61,7 @@ function validateRequestMethod<M extends string>(
     // method invalid
     throw new MethodNotAllowedError(
       method,
-      typeof allowedMethods === "string" ? [allowedMethods] : allowedMethods
+      typeof allowedMethods === "string" ? [allowedMethods] : allowedMethods,
     );
   }
 
@@ -72,12 +72,12 @@ async function validateRequest<
   T extends ApiRequestMetaType = ApiRequestMetaType
 >(
   req: NextApiRequest,
-  opts?: ApiDefOptions<T>
+  opts?: ApiDefOptions<T>,
 ): Promise<ApiRequestWithUtil<T>> {
   try {
     const method: T["MethodType"] = validateRequestMethod(
       req.method,
-      opts?.allowedMethods
+      opts?.allowedMethods,
     );
     const query: T["QueryType"] = opts?.querySchema
       ? await opts.querySchema.validate(req.query)
@@ -99,7 +99,7 @@ async function validateRequest<
           message: err.message,
           errors: err.errors,
         },
-        sc.BAD_REQUEST
+        sc.BAD_REQUEST,
       );
     } else throw err;
   }
@@ -120,9 +120,9 @@ export function defApi<
   TBody = unknown
 >(
   handler: (
-    reqUtil: ApiRequestWithUtil<ApiRequestMetaType<M, TQuery, TBody>>
+    reqUtil: ApiRequestWithUtil<ApiRequestMetaType<M, TQuery, TBody>>,
   ) => Promise<T> | T,
-  opts?: ApiDefOptions<ApiRequestMetaType<M, TQuery, TBody>>
+  opts?: ApiDefOptions<ApiRequestMetaType<M, TQuery, TBody>>,
 ): NextApiHandler {
   return async (req, resp) => {
     try {

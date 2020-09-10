@@ -33,5 +33,5 @@ export default defApi(
   {
     querySchema,
     allowedMethods: "GET",
-  }
+  },
 );

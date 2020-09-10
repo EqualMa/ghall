@@ -31,7 +31,7 @@ export interface UserPinnedItemBasicInfo {
         color: string;
         /** JavaScript */
         name: string;
-      }
+      },
     ];
   };
 }
@@ -84,7 +84,7 @@ async function queryUserHomepageHtml(userLogin: string): Promise<string> {
 // }
 
 export async function queryUserPinnedItemsFromHomepage(
-  userLogin: string
+  userLogin: string,
 ): Promise<UserPinnedItemBasicInfo[]> {
   const html = await queryUserHomepageHtml(userLogin);
   return extractUserPinnedItemsFromHtml(html);

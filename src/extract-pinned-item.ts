@@ -54,11 +54,11 @@ const extractLangFromDom: DomExtractor<{
 
 const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
   $,
-  dom
+  dom,
 ) => {
   const $elTitleAnchor = $(
     ".pinned-item-list-item-content a[data-hydro-click][data-hydro-click-hmac][href]",
-    dom
+    dom,
   );
   const href = $elTitleAnchor.attr("href");
   const url: URL | null = href ? new URL(href, "https://github.com") : null;
@@ -98,12 +98,12 @@ const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
 };
 
 export function extractUserPinnedItemsFromHtml(
-  html: string
+  html: string,
 ): UserPinnedItemBasicInfo[] {
   const $ = cheerio.load(html);
 
   const elms = $(
-    ".js-pinned-items-reorder-container > ol > li > .js-pinned-item-list-item"
+    ".js-pinned-items-reorder-container > ol > li > .js-pinned-item-list-item",
   ).toArray();
 
   return elms.map((elm) => extractUserPinnedItemFromDom($, elm));

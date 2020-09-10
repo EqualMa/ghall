@@ -38,7 +38,7 @@ export class AppError<T = string> extends Error {
 
   constructor(
     private readonly respOrData: string | CustomResponse | ResponseAction | T,
-    status?: number
+    status?: number,
   ) {
     super(typeof respOrData === "string" ? respOrData : undefined);
 

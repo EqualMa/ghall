@@ -14,7 +14,7 @@ export class CustomResponse {
           onResponse?: ResponseAction;
           headers?: ResponseHeaders;
           status?: number;
-        }
+        },
   ) {
     if (typeof opts === "function") opts = { onResponse: opts };
 
@@ -49,12 +49,12 @@ export class DataResponse<T = string | Buffer> extends CustomResponse {
   constructor(
     public data: T,
     statusOrHeaders?: number | ResponseHeaders,
-    headers?: ResponseHeaders
+    headers?: ResponseHeaders,
   ) {
     super(
       typeof statusOrHeaders === "object" && statusOrHeaders
         ? { headers: statusOrHeaders }
-        : { status: statusOrHeaders, headers }
+        : { status: statusOrHeaders, headers },
     );
   }
 
