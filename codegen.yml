@@ -3,6 +3,9 @@ schema: "schema.ghack.graphql"
 documents: "src/graphql/**/*.graphql"
 generates:
   src/graphql/generated.ts:
+    config:
+      # https://graphql-code-generator.com/docs/plugins/typescript-resolvers#integration-with-apollo-server
+      useIndexSignature: true
     plugins:
       - "typescript"
       - "typescript-operations"
