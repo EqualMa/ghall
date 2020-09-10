@@ -79,7 +79,7 @@ const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
   const lang = extractLangFromDom($, elMetaRow);
 
   return {
-    __typeName: isGist ? "Gist" : "Repository",
+    __typename: isGist ? "Gist" : "Repository",
 
     url: url?.toString() ?? "",
     name,

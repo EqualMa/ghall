@@ -2,7 +2,7 @@ import got from "got";
 import { extractUserPinnedItemsFromHtml } from "./extract-pinned-item";
 
 export interface UserPinnedItemBasicInfo {
-  __typeName: "Repository" | "Gist";
+  __typename: "Repository" | "Gist";
   /**
    * the name of a gist is its id in the url
    */
