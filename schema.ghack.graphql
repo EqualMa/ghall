@@ -1,0 +1,626 @@
+"""
+Represents an object which can take actions on GitHub. Typically a User or Bot.
+"""
+interface Actor {
+  """
+  A URL pointing to the actor's public avatar.
+  """
+  avatarUrl(
+    """
+    The size of the resulting square image.
+    """
+    size: Int
+  ): URI!
+
+  """
+  The username of the actor.
+  """
+  login: String!
+
+  """
+  The HTTP path for this actor.
+  """
+  resourcePath: URI!
+
+  """
+  The HTTP URL for this actor.
+  """
+  url: URI!
+}
+
+"""
+A Gist.
+"""
+type Gist implements Node & Starrable & UniformResourceLocatable {
+  """
+  The gist description.
+  """
+  description: String
+
+  """
+  A list of forks associated with the gist
+  """
+  forks: GistConnection!
+  id: ID!
+
+  """
+  The gist name.
+  """
+  name: String!
+
+  """
+  The gist owner.
+  """
+  owner: RepositoryOwner
+
+  """
+  The HTML path to this resource.
+  """
+  resourcePath: URI!
+
+  """
+  A list of users who have starred this starrable.
+  """
+  stargazers: StargazerConnection!
+
+  """
+  The HTTP URL for this Gist.
+  """
+  url: URI!
+}
+
+"""
+The connection type for Gist.
+"""
+type GistConnection {
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+Git SSH string
+"""
+scalar GitSSHRemote
+
+"""
+A string containing HTML code.
+"""
+scalar HTML
+
+"""
+Represents a given language found in repositories.
+"""
+type Language {
+  """
+  The color defined for the current language.
+  """
+  color: String
+
+  """
+  The name of the current language.
+  """
+  name: String!
+}
+
+"""
+An object with an ID.
+"""
+interface Node {
+  """
+  ID of the object.
+  """
+  id: ID!
+}
+
+"""
+Types that can be pinned to a profile page.
+"""
+union PinnableItem = Gist | Repository
+
+"""
+The connection type for PinnableItem.
+"""
+type PinnableItemConnection {
+  """
+  A list of nodes.
+  """
+  nodes: [PinnableItem]
+
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+Represents items that can be pinned to a profile page or dashboard.
+"""
+enum PinnableItemType {
+  """
+  A gist.
+  """
+  GIST
+
+  """
+  An issue.
+  """
+  ISSUE
+
+  """
+  An organization.
+  """
+  ORGANIZATION
+
+  """
+  A project.
+  """
+  PROJECT
+
+  """
+  A pull request.
+  """
+  PULL_REQUEST
+
+  """
+  A repository.
+  """
+  REPOSITORY
+
+  """
+  A team.
+  """
+  TEAM
+
+  """
+  A user.
+  """
+  USER
+}
+
+"""
+Represents any entity on GitHub that has a profile page.
+"""
+interface ProfileOwner {
+  """
+  The public profile email.
+  """
+  email: String
+
+  """
+  The public profile location.
+  """
+  location: String
+
+  """
+  The username used to login.
+  """
+  login: String!
+
+  """
+  The public profile name.
+  """
+  name: String
+
+  """
+  A list of repositories and gists this profile owner has pinned to their profile
+  """
+  pinnedItems(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Filter the types of pinned items that are returned.
+    """
+    types: [PinnableItemType!]
+  ): PinnableItemConnection!
+
+  """
+  The public profile website URL.
+  """
+  websiteUrl: URI
+}
+
+"""
+The query root of GitHub's GraphQL interface.
+"""
+type Query {
+  """
+  Lookup a user by login.
+  """
+  user(
+    """
+    The user's login.
+    """
+    login: String!
+  ): User
+}
+
+"""
+A repository contains the content for a project.
+"""
+type Repository implements RepositoryInfo & Starrable & UniformResourceLocatable {
+  """
+  The description of the repository.
+  """
+  description: String
+
+  """
+  The description of the repository rendered to HTML.
+  """
+  descriptionHTML: HTML!
+
+  """
+  Returns how many forks there are of this repository in the whole network.
+  """
+  forkCount: Int!
+
+  """
+  A list of direct forked repositories.
+  """
+  forks: RepositoryConnection!
+
+  """
+  The repository's URL.
+  """
+  homepageUrl: URI
+
+  """
+  Identifies if the repository is a fork.
+  """
+  isFork: Boolean!
+
+  """
+  The name of the repository.
+  """
+  name: String!
+
+  """
+  The repository's name with owner.
+  """
+  nameWithOwner: String!
+
+  """
+  The User owner of the repository.
+  """
+  owner: RepositoryOwner!
+
+  """
+  The repository parent, if this is a fork.
+  """
+  parent: Repository
+
+  """
+  The primary language of the repository's code.
+  """
+  primaryLanguage: Language
+
+  """
+  The HTTP path for this repository
+  """
+  resourcePath: URI!
+
+  """
+  A description of the repository, rendered to HTML without any links in it.
+  """
+  shortDescriptionHTML(
+    """
+    How many characters to return.
+    """
+    limit: Int = 200
+  ): HTML!
+
+  """
+  The SSH URL to clone this repository
+  """
+  sshUrl: GitSSHRemote!
+
+  """
+  A list of users who have starred this starrable.
+  """
+  stargazers: StargazerConnection!
+
+  """
+  The HTTP URL for this repository
+  """
+  url: URI!
+}
+
+"""
+A list of repositories owned by the subject.
+"""
+type RepositoryConnection {
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A subset of repository info.
+"""
+interface RepositoryInfo {
+  """
+  The description of the repository.
+  """
+  description: String
+
+  """
+  The description of the repository rendered to HTML.
+  """
+  descriptionHTML: HTML!
+
+  """
+  Returns how many forks there are of this repository in the whole network.
+  """
+  forkCount: Int!
+
+  """
+  The repository's URL.
+  """
+  homepageUrl: URI
+
+  """
+  Identifies if the repository is a fork.
+  """
+  isFork: Boolean!
+
+  """
+  The name of the repository.
+  """
+  name: String!
+
+  """
+  The repository's name with owner.
+  """
+  nameWithOwner: String!
+
+  """
+  The User owner of the repository.
+  """
+  owner: RepositoryOwner!
+
+  """
+  The HTTP path for this repository
+  """
+  resourcePath: URI!
+
+  """
+  A description of the repository, rendered to HTML without any links in it.
+  """
+  shortDescriptionHTML(
+    """
+    How many characters to return.
+    """
+    limit: Int = 200
+  ): HTML!
+
+  """
+  The HTTP URL for this repository
+  """
+  url: URI!
+}
+
+"""
+Represents an owner of a Repository.
+"""
+interface RepositoryOwner {
+  """
+  A URL pointing to the owner's public avatar.
+  """
+  avatarUrl(
+    """
+    The size of the resulting square image.
+    """
+    size: Int
+  ): URI!
+  id: ID!
+
+  """
+  The username used to login.
+  """
+  login: String!
+
+  """
+  The HTTP URL for the owner.
+  """
+  resourcePath: URI!
+
+  """
+  The HTTP URL for the owner.
+  """
+  url: URI!
+}
+
+"""
+The connection type for User.
+"""
+type StargazerConnection {
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+Things that can be starred.
+"""
+interface Starrable {
+  """
+  A list of users who have starred this starrable.
+  """
+  stargazers: StargazerConnection!
+}
+
+"""
+An RFC 3986, RFC 3987, and RFC 6570 (level 4) compliant URI string.
+"""
+scalar URI
+
+"""
+Represents a type that can be retrieved by a URL.
+"""
+interface UniformResourceLocatable {
+  """
+  The HTML path to this resource.
+  """
+  resourcePath: URI!
+
+  """
+  The URL to this resource.
+  """
+  url: URI!
+}
+
+"""
+A user is an individual's account on GitHub that owns repositories and can make new content.
+"""
+type User implements Actor & ProfileOwner & UniformResourceLocatable {
+  """
+  A URL pointing to the user's public avatar.
+  """
+  avatarUrl(
+    """
+    The size of the resulting square image.
+    """
+    size: Int
+  ): URI!
+
+  """
+  The user's public profile bio.
+  """
+  bio: String
+
+  """
+  The user's public profile bio as HTML.
+  """
+  bioHTML: HTML!
+
+  """
+  The user's public profile company.
+  """
+  company: String
+
+  """
+  The user's public profile company as HTML.
+  """
+  companyHTML: HTML!
+
+  """
+  The user's publicly visible profile email.
+  """
+  email: String!
+
+  """
+  The user's public profile location.
+  """
+  location: String
+
+  """
+  The username used to login.
+  """
+  login: String!
+
+  """
+  The user's public profile name.
+  """
+  name: String
+
+  """
+  A list of repositories and gists this profile owner has pinned to their profile
+  """
+  pinnedItems(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Filter the types of pinned items that are returned.
+    """
+    types: [PinnableItemType!]
+  ): PinnableItemConnection!
+
+  """
+  The HTTP path for this user
+  """
+  resourcePath: URI!
+
+  """
+  The user's description of what they're currently doing.
+  """
+  status: UserStatus
+
+  """
+  The user's Twitter username.
+  """
+  twitterUsername: String
+
+  """
+  The HTTP URL for this user
+  """
+  url: URI!
+
+  """
+  A URL pointing to the user's public website/blog.
+  """
+  websiteUrl: URI
+}
+
+"""
+The user's description of what they're currently doing.
+"""
+type UserStatus {
+  """
+  An emoji summarizing the user's status.
+  """
+  emoji: String
+
+  """
+  The status emoji as HTML.
+  """
+  emojiHTML: HTML
+
+  """
+  A brief message describing what the user is doing.
+  """
+  message: String
+
+  """
+  The user who has this status.
+  """
+  user: User!
+}
