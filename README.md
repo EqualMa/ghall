@@ -1,4 +1,18 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Access GitHub public data through REST or GraphQL api **without authorization**
+
+## REST Api
+
+## GraphQL Api
+
+the design principle of `ghack` GraphQL api is:
+
+`ghack` GraphQL api should be a subset of [GitHub GraphQL Api](https://docs.github.com/graphql), which means:
+
+- [`ghack` graphql schema](schema.ghack.graphql) should be a subset of [GitHub public graphql schema](https://docs.github.com/public/schema.docs.graphql),
+
+- each query to `ghack` graphql api, should be also a valid query for GitHub GraphQL Api, and have same response
+
+For short: **`ghack` GraphQL api is an implementation for a subset of GitHub GraphQL Api**
 
 ## Getting Started
 
