@@ -16,7 +16,11 @@ const getApolloServerHandler = cached(async () => {
   );
   const typeDefs = gql(...getArgs`${schema}`);
 
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    introspection: true,
+  });
 
   return server.createHandler({ path: "/api" });
 });
