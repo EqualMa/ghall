@@ -1,0 +1,7 @@
+.graphiql-wrapper {
+  height: 100vh;
+}
+
+.graphiql-wrapper * {
+  box-sizing: unset;
+}
