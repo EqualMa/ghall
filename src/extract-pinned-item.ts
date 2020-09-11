@@ -102,6 +102,12 @@ export function extractUserPinnedItemsFromHtml(
 ): UserPinnedItemBasicInfo[] {
   const $ = cheerio.load(html);
 
+  return extractUserPinnedItemsFromCheerio($);
+}
+
+export function extractUserPinnedItemsFromCheerio(
+  $: CheerioStatic,
+): UserPinnedItemBasicInfo[] {
   const elms = $(
     ".js-pinned-items-reorder-container > ol > li > .js-pinned-item-list-item",
   ).toArray();
