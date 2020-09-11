@@ -245,6 +245,7 @@ export type RepositoryInfoShortDescriptionHtmlArgs = {
 export type RepositoryOwner = {
   /** A URL pointing to the owner's public avatar. */
   avatarUrl: Scalars["URI"];
+  id: Scalars["ID"];
   /** The username used to login. */
   login: Scalars["String"];
   /** The HTTP URL for the owner. */
@@ -281,6 +282,7 @@ export type UniformResourceLocatable = {
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type User = Actor &
+  Node &
   ProfileOwner &
   RepositoryOwner &
   UniformResourceLocatable & {
@@ -295,8 +297,11 @@ export type User = Actor &
     company?: Maybe<Scalars["String"]>;
     /** The user's public profile company as HTML. */
     companyHTML: Scalars["HTML"];
+    /** Identifies the primary key from the database. */
+    databaseId?: Maybe<Scalars["Int"]>;
     /** The user's publicly visible profile email. */
     email: Scalars["String"];
+    id: Scalars["ID"];
     /** The user's public profile location. */
     location?: Maybe<Scalars["String"]>;
     /** The username used to login. */
@@ -537,7 +542,7 @@ export type ResolversTypes = ResolversObject<{
   GitSSHRemote: ResolverTypeWrapper<Scalars["GitSSHRemote"]>;
   HTML: ResolverTypeWrapper<Scalars["HTML"]>;
   Language: ResolverTypeWrapper<Language>;
-  Node: ResolversTypes["Gist"];
+  Node: ResolversTypes["Gist"] | ResolversTypes["User"];
   PinnableItem: ResolversTypes["Gist"] | ResolversTypes["Repository"];
   PinnableItemConnection: ResolverTypeWrapper<
     Omit<PinnableItemConnection, "nodes"> & {
@@ -574,7 +579,7 @@ export type ResolversParentTypes = ResolversObject<{
   GitSSHRemote: Scalars["GitSSHRemote"];
   HTML: Scalars["HTML"];
   Language: Language;
-  Node: ResolversParentTypes["Gist"];
+  Node: ResolversParentTypes["Gist"] | ResolversParentTypes["User"];
   PinnableItem:
     | ResolversParentTypes["Gist"]
     | ResolversParentTypes["Repository"];
@@ -673,7 +678,7 @@ export type NodeResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Node"] = ResolversParentTypes["Node"]
 > = ResolversObject<{
-  __resolveType: TypeResolveFn<"Gist", ParentType, ContextType>;
+  __resolveType: TypeResolveFn<"Gist" | "User", ParentType, ContextType>;
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
 }>;
 
@@ -821,6 +826,7 @@ export type RepositoryOwnerResolvers<
     ContextType,
     RequireFields<RepositoryOwnerAvatarUrlArgs, never>
   >;
+  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
@@ -878,7 +884,9 @@ export type UserResolvers<
   bioHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
   company?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   companyHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
+  databaseId?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
   email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   location?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
