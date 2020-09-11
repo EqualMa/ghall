@@ -35,6 +35,10 @@ const nodeTypeToDefs = {
     field: "databaseId",
     type: "number",
   },
+  User: {
+    field: "databaseId",
+    type: "number",
+  },
 } as const;
 
 export type NodeTypeName = keyof typeof nodeTypeToDefs;

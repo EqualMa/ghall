@@ -432,6 +432,7 @@ interface RepositoryOwner {
     """
     size: Int
   ): URI!
+  id: ID!
 
   """
   The username used to login.
@@ -492,7 +493,7 @@ interface UniformResourceLocatable {
 """
 A user is an individual's account on GitHub that owns repositories and can make new content.
 """
-type User implements Actor & ProfileOwner & RepositoryOwner & UniformResourceLocatable {
+type User implements Actor & Node & ProfileOwner & RepositoryOwner & UniformResourceLocatable {
   """
   A URL pointing to the user's public avatar.
   """
@@ -524,9 +525,16 @@ type User implements Actor & ProfileOwner & RepositoryOwner & UniformResourceLoc
   companyHTML: HTML!
 
   """
+  Identifies the primary key from the database.
+  """
+  databaseId: Int
+
+  """
   The user's publicly visible profile email.
   """
   email: String!
+
+  id: ID!
 
   """
   The user's public profile location.
