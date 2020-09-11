@@ -91,6 +91,7 @@ export function decodeNodeId(idBase64: string): IdInfo<NodeTypeName> {
 
 export function encodeNodeId<T extends NodeTypeName>(
   info: Pick<IdInfo<T>, "__typename" | "value">,
+  _fieldHint?: IdInfo<T>["field"],
 ): string {
   const def = nodeTypeToDefs[info.__typename];
 
