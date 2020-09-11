@@ -3,6 +3,7 @@ import {
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
+import { UserCrawler } from "../github/crawler";
 import { gql } from "@apollo/client";
 import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
@@ -564,8 +565,10 @@ export type ResolversTypes = ResolversObject<{
     | ResolversTypes["Gist"]
     | ResolversTypes["Repository"]
     | ResolversTypes["User"];
-  User: ResolverTypeWrapper<User>;
-  UserStatus: ResolverTypeWrapper<UserStatus>;
+  User: ResolverTypeWrapper<UserCrawler>;
+  UserStatus: ResolverTypeWrapper<
+    Omit<UserStatus, "user"> & { user: ResolversTypes["User"] }
+  >;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -600,8 +603,8 @@ export type ResolversParentTypes = ResolversObject<{
     | ResolversParentTypes["Gist"]
     | ResolversParentTypes["Repository"]
     | ResolversParentTypes["User"];
-  User: User;
-  UserStatus: UserStatus;
+  User: UserCrawler;
+  UserStatus: Omit<UserStatus, "user"> & { user: ResolversParentTypes["User"] };
 }>;
 
 export type ActorResolvers<

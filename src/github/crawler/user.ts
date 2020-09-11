@@ -5,7 +5,7 @@ import { encodeNodeId } from "../id";
 import { extractUserPinnedItemsFromCheerio } from "../../extract-pinned-item";
 import { PinnableItemConnection } from "../../graphql/generated";
 
-const getBaseAvatarUrl = memoizeWithThis(function (this: UserExtractor) {
+const getAvatarUrlObj = memoizeWithThis(function (this: UserExtractor) {
   const $ = this.$;
   const a = $("a[itemprop=image] > img.avatar.avatar-user").attr("src");
   if (!a) throw new Error("avatar url not found");
@@ -14,9 +14,9 @@ const getBaseAvatarUrl = memoizeWithThis(function (this: UserExtractor) {
 
 const REGEX_DATABASE_ID_FROM_URL = /^\/u\/\d+$$/;
 const getDatabaseId = memoizeWithThis(function (this: UserExtractor) {
-  const res = REGEX_DATABASE_ID_FROM_URL.exec(this.avatarBaseUrl.pathname);
+  const res = REGEX_DATABASE_ID_FROM_URL.exec(this._avatarUrlObj.pathname);
   if (!res)
-    throw new Error(`not found: User.databaseId in ${this.avatarBaseUrl.href}`);
+    throw new Error(`not found: User.databaseId in ${this._avatarUrlObj.href}`);
 
   return parseInt(res[1]);
 });
@@ -102,8 +102,8 @@ export class UserExtractor extends CheerioExtractor {
     return ghUserUrl(this.login);
   }
 
-  get avatarBaseUrl(): URL {
-    return getBaseAvatarUrl.call(this);
+  get _avatarUrlObj(): URL {
+    return getAvatarUrlObj.call(this);
   }
 
   get databaseId(): number {
@@ -154,8 +154,8 @@ export class UserExtractor extends CheerioExtractor {
     return getPinnedItems.call(this);
   }
 
-  getAvatarUrl(size?: number): string {
-    const ab = this.avatarBaseUrl;
+  getAvatarUrl(size?: number | null): string {
+    const ab = this._avatarUrlObj.origin + this._avatarUrlObj.pathname;
     return `${ab}?${typeof size === "number" ? `s=${size}&` : ""}v=4`;
   }
   get avatarUrl(): string {
