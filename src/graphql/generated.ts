@@ -241,6 +241,23 @@ export type RepositoryInfoShortDescriptionHtmlArgs = {
   limit?: Maybe<Scalars["Int"]>;
 };
 
+/** Represents an owner of a Repository. */
+export type RepositoryOwner = {
+  /** A URL pointing to the owner's public avatar. */
+  avatarUrl: Scalars["URI"];
+  /** The username used to login. */
+  login: Scalars["String"];
+  /** The HTTP URL for the owner. */
+  resourcePath: Scalars["URI"];
+  /** The HTTP URL for the owner. */
+  url: Scalars["URI"];
+};
+
+/** Represents an owner of a Repository. */
+export type RepositoryOwnerAvatarUrlArgs = {
+  size?: Maybe<Scalars["Int"]>;
+};
+
 /** The connection type for User. */
 export type StargazerConnection = {
   __typename?: "StargazerConnection";
@@ -265,6 +282,7 @@ export type UniformResourceLocatable = {
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type User = Actor &
   ProfileOwner &
+  RepositoryOwner &
   UniformResourceLocatable & {
     __typename?: "User";
     /** A URL pointing to the user's public avatar. */
@@ -326,30 +344,70 @@ export type UserStatus = {
   user: User;
 };
 
-/** Represents an owner of a Repository. */
-export type RepositoryOwner = {
-  /** A URL pointing to the owner's public avatar. */
-  avatarUrl: Scalars["URI"];
-  id: Scalars["ID"];
-  /** The username used to login. */
-  login: Scalars["String"];
-  /** The HTTP URL for the owner. */
-  resourcePath: Scalars["URI"];
-  /** The HTTP URL for the owner. */
-  url: Scalars["URI"];
-};
-
-/** Represents an owner of a Repository. */
-export type RepositoryOwnerAvatarUrlArgs = {
-  size?: Maybe<Scalars["Int"]>;
-};
-
 export type UserQueryVariables = Exact<{
   login: Scalars["String"];
 }>;
 
 export type UserQuery = { __typename?: "Query" } & {
-  user?: Maybe<{ __typename?: "User" } & Pick<User, "login" | "name" | "bio">>;
+  user?: Maybe<
+    { __typename?: "User" } & Pick<
+      User,
+      | "login"
+      | "name"
+      | "bio"
+      | "avatarUrl"
+      | "url"
+      | "websiteUrl"
+      | "location"
+      | "email"
+      | "twitterUsername"
+    > & {
+        status?: Maybe<
+          { __typename?: "UserStatus" } & Pick<
+            UserStatus,
+            "emoji" | "message" | "emojiHTML"
+          >
+        >;
+        pinnedItems: { __typename?: "PinnableItemConnection" } & Pick<
+          PinnableItemConnection,
+          "totalCount"
+        > & {
+            nodes?: Maybe<
+              Array<
+                Maybe<
+                  | ({ __typename: "Gist" } & Pick<
+                      Gist,
+                      "id" | "name" | "url" | "description"
+                    > & {
+                        repoOwner?: Maybe<
+                          { __typename?: "User" } & Pick<
+                            User,
+                            "login" | "avatarUrl" | "url"
+                          >
+                        >;
+                        stargazers: {
+                          __typename?: "StargazerConnection";
+                        } & Pick<StargazerConnection, "totalCount">;
+                      })
+                  | ({ __typename: "Repository" } & Pick<
+                      Repository,
+                      | "name"
+                      | "url"
+                      | "description"
+                      | "forkCount"
+                      | "homepageUrl"
+                    > & {
+                        gistOwner: { __typename?: "User" } & Pick<
+                          User,
+                          "login" | "avatarUrl" | "url"
+                        >;
+                      })
+                >
+              >
+            >;
+          };
+      }
+  >;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -493,6 +551,7 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   RepositoryConnection: ResolverTypeWrapper<RepositoryConnection>;
   RepositoryInfo: ResolversTypes["Repository"];
+  RepositoryOwner: ResolversTypes["User"];
   StargazerConnection: ResolverTypeWrapper<StargazerConnection>;
   Starrable: ResolversTypes["Gist"] | ResolversTypes["Repository"];
   URI: ResolverTypeWrapper<Scalars["URI"]>;
@@ -502,7 +561,6 @@ export type ResolversTypes = ResolversObject<{
     | ResolversTypes["User"];
   User: ResolverTypeWrapper<User>;
   UserStatus: ResolverTypeWrapper<UserStatus>;
-  RepositoryOwner: never;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -529,6 +587,7 @@ export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars["Boolean"];
   RepositoryConnection: RepositoryConnection;
   RepositoryInfo: ResolversParentTypes["Repository"];
+  RepositoryOwner: ResolversParentTypes["User"];
   StargazerConnection: StargazerConnection;
   Starrable: ResolversParentTypes["Gist"] | ResolversParentTypes["Repository"];
   URI: Scalars["URI"];
@@ -538,7 +597,6 @@ export type ResolversParentTypes = ResolversObject<{
     | ResolversParentTypes["User"];
   User: User;
   UserStatus: UserStatus;
-  RepositoryOwner: never;
 }>;
 
 export type ActorResolvers<
@@ -752,6 +810,22 @@ export type RepositoryInfoResolvers<
   url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
 }>;
 
+export type RepositoryOwnerResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["RepositoryOwner"] = ResolversParentTypes["RepositoryOwner"]
+> = ResolversObject<{
+  __resolveType: TypeResolveFn<"User", ParentType, ContextType>;
+  avatarUrl?: Resolver<
+    ResolversTypes["URI"],
+    ParentType,
+    ContextType,
+    RequireFields<RepositoryOwnerAvatarUrlArgs, never>
+  >;
+  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+}>;
+
 export type StargazerConnectionResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["StargazerConnection"] = ResolversParentTypes["StargazerConnection"]
@@ -841,23 +915,6 @@ export type UserStatusResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
-export type RepositoryOwnerResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["RepositoryOwner"] = ResolversParentTypes["RepositoryOwner"]
-> = ResolversObject<{
-  __resolveType: TypeResolveFn<null, ParentType, ContextType>;
-  avatarUrl?: Resolver<
-    ResolversTypes["URI"],
-    ParentType,
-    ContextType,
-    RequireFields<RepositoryOwnerAvatarUrlArgs, never>
-  >;
-  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-}>;
-
 export type Resolvers<ContextType = any> = ResolversObject<{
   Actor?: ActorResolvers<ContextType>;
   Gist?: GistResolvers<ContextType>;
@@ -873,13 +930,13 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Repository?: RepositoryResolvers<ContextType>;
   RepositoryConnection?: RepositoryConnectionResolvers<ContextType>;
   RepositoryInfo?: RepositoryInfoResolvers<ContextType>;
+  RepositoryOwner?: RepositoryOwnerResolvers<ContextType>;
   StargazerConnection?: StargazerConnectionResolvers<ContextType>;
   Starrable?: StarrableResolvers<ContextType>;
   URI?: GraphQLScalarType;
   UniformResourceLocatable?: UniformResourceLocatableResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   UserStatus?: UserStatusResolvers<ContextType>;
-  RepositoryOwner?: RepositoryOwnerResolvers<ContextType>;
 }>;
 
 /**
@@ -894,6 +951,50 @@ export const UserDocument = gql`
       login
       name
       bio
+      avatarUrl
+      url
+      websiteUrl
+      location
+      email
+      status {
+        emoji
+        message
+        emojiHTML
+      }
+      twitterUsername
+      pinnedItems(first: 6) {
+        totalCount
+        nodes {
+          ... on Repository {
+            __typename
+            name
+            url
+            description
+            gistOwner: owner {
+              login
+              avatarUrl
+              url
+            }
+            forkCount
+            homepageUrl
+          }
+          ... on Gist {
+            __typename
+            id
+            name
+            repoOwner: owner {
+              login
+              avatarUrl
+              url
+            }
+            stargazers {
+              totalCount
+            }
+            url
+            description
+          }
+        }
+      }
     }
   }
 `;

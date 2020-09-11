@@ -3,5 +3,50 @@ query user($login: String!) {
     login
     name
     bio
+    avatarUrl
+    url
+    websiteUrl
+    location
+    email
+    status {
+      emoji
+      message
+      emojiHTML
+    }
+    twitterUsername
+
+    pinnedItems(first: 6) {
+      totalCount
+      nodes {
+        ... on Repository {
+          __typename
+          name
+          url
+          description
+          gistOwner: owner {
+            login
+            avatarUrl
+            url
+          }
+          forkCount
+          homepageUrl
+        }
+        ... on Gist {
+          __typename
+          id
+          name
+          repoOwner: owner {
+            login
+            avatarUrl
+            url
+          }
+          stargazers {
+            totalCount
+          }
+          url
+          description
+        }
+      }
+    }
   }
 }
