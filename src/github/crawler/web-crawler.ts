@@ -32,12 +32,21 @@ export class WebPageCrawler<T extends CheerioExtractor> extends WebCrawler<T> {
     return typeof url === "string" ? got(url).text() : url();
   }
 
-  protected async queryResource(): Promise<T> {
-    const html = await this.queryPage();
-    const $ = cheerio.load(html);
-    const g = this.#getCheerioExtractor;
+  protected handleError(err: unknown): never | Promise<never> {
+    throw err;
+  }
 
-    return g($);
+  protected async queryResource(): Promise<T> {
+    try {
+      const html = await this.queryPage();
+      const $ = cheerio.load(html);
+      const g = this.#getCheerioExtractor;
+
+      return g($);
+    } catch (err) {
+      await this.handleError(err);
+      throw new Error("handleError should throw errors");
+    }
   }
 }
 
