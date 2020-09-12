@@ -1,19 +1,16 @@
-query user($login: String!) {
+query userInfo($login: String!, $avatarSize: Int) {
   user(login: $login) {
+    avatarUrl(size: $avatarSize)
+    bio
+    bioHTML
+    company
+    companyHTML
+    databaseId
+    email
+    id
+    location
     login
     name
-    bio
-    avatarUrl
-    url
-    websiteUrl
-    location
-    email
-    status {
-      emoji
-      message
-      emojiHTML
-    }
-    twitterUsername
 
     pinnedItems(first: 6) {
       totalCount
@@ -48,5 +45,16 @@ query user($login: String!) {
         }
       }
     }
+
+    resourcePath
+    status {
+      emoji
+      emojiHTML
+      message
+      user
+    }
+    twitterUsername
+    url
+    websiteUrl
   }
 }
