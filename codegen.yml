@@ -7,7 +7,7 @@ generates:
       # https://graphql-code-generator.com/docs/plugins/typescript-resolvers#integration-with-apollo-server
       useIndexSignature: true
       mappers:
-        User: ../github/crawler#UserCrawler
+        User: ../github/crawler#UserExtractor
     plugins:
       - "typescript"
       - "typescript-operations"
