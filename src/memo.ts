@@ -13,12 +13,25 @@ export interface CacheLike<K, V> {
 
 const defaultGetKey = (v: unknown) => v;
 
-function memoizeImpl<R, TThis, TArgs extends unknown[], K>(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K,
-  cache: CacheLike<K, R>,
-): typeof func {
-  return function (this, ...args: TArgs) {
+type AnyFunc = (this: any, ...args: any[]) => any;
+type GetKeyForFunc<F extends AnyFunc, K> = (
+  this: ThisParameterType<F>,
+  ...args: Parameters<F>
+) => K;
+
+type NormFunc<F extends AnyFunc> = (
+  this: ThisParameterType<F>,
+  ...args: Parameters<F>
+) => ReturnType<F>;
+
+type CacheLikeForFunc<F extends AnyFunc, K> = CacheLike<K, ReturnType<F>>;
+
+function memoizeImpl<F extends AnyFunc, K>(
+  func: F,
+  getKey: GetKeyForFunc<F, K>,
+  cache: CacheLikeForFunc<F, K>,
+): NormFunc<F> {
+  return function (this, ...args) {
     const key = getKey.apply(this, args);
     if (cache.has(key)) {
       return cache.get(key)!;
@@ -30,30 +43,21 @@ function memoizeImpl<R, TThis, TArgs extends unknown[], K>(
   };
 }
 
-export function memoize<
-  R,
-  TThis = unknown,
-  TArgs extends unknown[] = unknown[]
->(
-  func: (this: TThis, ...args: TArgs) => R,
+export function memoize<F extends AnyFunc>(
+  func: F,
   getKey?: undefined,
-  cache?: CacheLike<TArgs[0], R>,
-): typeof func;
-export function memoize<
-  R,
-  TThis = unknown,
-  TArgs extends unknown[] = unknown[],
-  K = unknown
->(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K,
-  cache?: CacheLike<K, R>,
-): typeof func;
-export function memoize<R, TThis, TArgs extends unknown[], K>(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K = defaultGetKey as never,
-  cache: CacheLike<K, R> = new Map(),
-): typeof func {
+  cache?: CacheLikeForFunc<F, Parameters<F>[0]>,
+): NormFunc<F>;
+export function memoize<F extends AnyFunc, K = unknown>(
+  func: F,
+  getKey: GetKeyForFunc<F, K>,
+  cache?: CacheLikeForFunc<F, K>,
+): NormFunc<F>;
+export function memoize<F extends AnyFunc, K = unknown>(
+  func: F,
+  getKey: GetKeyForFunc<F, K> = defaultGetKey as never,
+  cache: CacheLikeForFunc<F, K> = new Map(),
+): NormFunc<F> {
   return memoizeImpl(func, getKey, cache);
 }
 
@@ -80,12 +84,19 @@ export class SmartCacheMap<K, V> implements CacheLike<K, V> {
   }
 }
 
-function memoizeWithThisImpl<TThis, R, TArgs extends unknown[], K>(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K,
-  getThisCache: (this: TThis) => CacheLike<K, R> = () => new Map(),
-): typeof func {
-  const getSelfCache = memoizeImpl<CacheLike<K, R>, unknown, [TThis], TThis>(
+type GetThisCacheForFunc<F extends AnyFunc, K> = (
+  this: ThisParameterType<F>,
+) => CacheLikeForFunc<F, K>;
+
+function memoizeWithThisImpl<F extends AnyFunc, K>(
+  func: F,
+  getKey: GetKeyForFunc<F, K>,
+  getThisCache: GetThisCacheForFunc<F, K> = () => new Map(),
+): NormFunc<F> {
+  const getSelfCache = memoizeImpl<
+    (self: ThisParameterType<F>) => CacheLikeForFunc<F, K>,
+    ThisParameterType<F>
+  >(
     (self) => getThisCache.apply(self),
     (self) => self,
     new SmartCacheMap(),
@@ -123,29 +134,20 @@ function memoizeWithThisImpl<TThis, R, TArgs extends unknown[], K>(
 
 const defaultGetThisCache = <K, V>() => new Map<K, V>();
 
-export function memoizeWithThis<
-  R,
-  TThis = unknown,
-  TArgs extends unknown[] = unknown[]
->(
-  func: (this: TThis, ...args: TArgs) => R,
+export function memoizeWithThis<F extends AnyFunc>(
+  func: F,
   getKey?: undefined,
-  getThisCache?: (this: TThis) => CacheLike<TArgs[0], R>,
-): typeof func;
-export function memoizeWithThis<
-  R,
-  TThis = unknown,
-  TArgs extends unknown[] = unknown[],
-  K = unknown
->(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K,
-  getThisCache?: (this: TThis) => CacheLike<K, R>,
-): typeof func;
-export function memoizeWithThis<R, TThis, TArgs extends unknown[], K>(
-  func: (this: TThis, ...args: TArgs) => R,
-  getKey: (this: TThis, ...args: TArgs) => K = defaultGetKey as never,
-  getThisCache: (this: TThis) => CacheLike<K, R> = defaultGetThisCache,
-): typeof func {
+  getThisCache?: GetThisCacheForFunc<F, Parameters<F>[0]>,
+): NormFunc<F>;
+export function memoizeWithThis<F extends AnyFunc, K = unknown>(
+  func: F,
+  getKey: GetKeyForFunc<F, K>,
+  getThisCache?: GetThisCacheForFunc<F, K>,
+): NormFunc<F>;
+export function memoizeWithThis<F extends AnyFunc, K = unknown>(
+  func: F,
+  getKey: GetKeyForFunc<F, K> = defaultGetKey as never,
+  getThisCache: GetThisCacheForFunc<F, K> = defaultGetThisCache,
+): NormFunc<F> {
   return memoizeWithThisImpl(func, getKey, getThisCache);
 }
