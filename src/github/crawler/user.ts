@@ -5,10 +5,12 @@ import { encodeNodeId } from "../id";
 import { extractUserPinnedItemsFromCheerio } from "../../extract-pinned-item";
 import {
   PinnableItemConnection,
+  ProfileOwnerPinnedItemsArgs,
   ResolversTypes,
 } from "../../graphql/generated";
 import got from "got/dist/source";
 import { ApolloError } from "apollo-server-micro";
+import { PinnableItemConnectionExtractor } from "./pinned-item";
 
 const getAvatarUrlObj = memoizeWithThis(function (this: UserExtractor) {
   const $ = this.$;
@@ -130,6 +132,14 @@ const twitterUsername = memoizeWithThis(function (this: UserExtractor) {
     : null;
 });
 
+const $pinnedItemsEls = memoizeWithThis(function (
+  this: UserExtractor,
+): Cheerio {
+  return this.$(
+    ".js-pinned-items-reorder-container > ol > li > .js-pinned-item-list-item",
+  );
+});
+
 export class UserExtractor extends CheerioExtractor {
   constructor($: CheerioStatic, public readonly login: string) {
     super($);
@@ -199,8 +209,17 @@ export class UserExtractor extends CheerioExtractor {
     return getWebsiteUrl.call(this);
   }
 
-  get pinnedItems(): PinnableItemConnection {
-    return getPinnedItems.call(this);
+  private get $pinnedItemsEls() {
+    return $pinnedItemsEls.call(this);
+  }
+  getPinnedItemsConnection(
+    args: ProfileOwnerPinnedItemsArgs,
+  ): PinnableItemConnectionExtractor {
+    return new PinnableItemConnectionExtractor(
+      this.$,
+      this.$pinnedItemsEls,
+      args,
+    );
   }
 
   getAvatarUrl(size?: number | null): string {

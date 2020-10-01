@@ -115,6 +115,31 @@ interface Node {
 }
 
 """
+Information about pagination in a connection.
+"""
+type PageInfo {
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: String
+
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: String
+}
+
+"""
 Types that can be pinned to a profile page.
 """
 union PinnableItem = Gist | Repository
@@ -124,14 +149,39 @@ The connection type for PinnableItem.
 """
 type PinnableItemConnection {
   """
+  A list of edges.
+  """
+  edges: [PinnableItemEdge]
+
+  """
   A list of nodes.
   """
   nodes: [PinnableItem]
 
   """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+
+  """
   Identifies the total count of items in the connection.
   """
   totalCount: Int!
+}
+
+"""
+An edge in a connection.
+"""
+type PinnableItemEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: PinnableItem
 }
 
 """
@@ -279,11 +329,6 @@ type Repository implements RepositoryInfo & Starrable & UniformResourceLocatable
   forks: RepositoryConnection!
 
   """
-  The repository's URL.
-  """
-  homepageUrl: URI
-
-  """
   Identifies if the repository is a fork.
   """
   isFork: Boolean!
@@ -372,11 +417,6 @@ interface RepositoryInfo {
   Returns how many forks there are of this repository in the whole network.
   """
   forkCount: Int!
-
-  """
-  The repository's URL.
-  """
-  homepageUrl: URI
 
   """
   Identifies if the repository is a fork.

@@ -1,5 +1,11 @@
 import cheerio from "cheerio";
+import {
+  Language,
+  ProfileOwnerPinnedItemsArgs,
+  Repository,
+} from "./graphql/generated";
 import { UserPinnedItemBasicInfo } from "./pinned-items";
+import { tryParseInt } from "./util/parse";
 
 type DomExtractor<T = string> = ($: CheerioStatic, dom: CheerioElement) => T;
 
@@ -12,11 +18,6 @@ const extractDescriptionFromDom: DomExtractor = ($, dom) => {
 
 function extractGistNameFromUrl(url: URL | null) {
   return url?.pathname.slice(1) ?? "";
-}
-
-function tryParseInt(str: string): number {
-  const num = parseInt(str, 10);
-  return Number.isNaN(num) ? 0 : num;
 }
 
 const extractStarCountFromDom: DomExtractor<number> = ($, dom) => {
@@ -36,23 +37,24 @@ const extractForkParentFromDom: DomExtractor<
   UserPinnedItemBasicInfo["parent"]
 > = () => null;
 
-const extractLangFromDom: DomExtractor<{
-  color: string;
-  name: string;
-} | null> = ($, dom) => {
+const extractLangFromDom: DomExtractor<Required<Language> | null> = (
+  $,
+  dom,
+) => {
   const $el = $(".repo-language-color + [itemprop=programmingLanguage]", dom);
 
   if ($el.length > 0) {
     const color = $el.prev().css("background-color");
     const name = $el.text().trim();
     return {
+      __typename: "Language",
       color,
       name,
     };
   } else return null;
 };
 
-const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
+export const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
   $,
   dom,
 ) => {
@@ -76,25 +78,45 @@ const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo> = (
     $(".pinned-item-list-item-content > *:last-child", dom)[0] ?? dom;
   const starCount: number = extractStarCountFromDom($, elMetaRow);
   const forkCount: number = extractForkCountFromDom($, elMetaRow);
-  const lang = extractLangFromDom($, elMetaRow);
+  if (isGist) {
+    const info: UserPinnedItemBasicInfo = {
+      __typename: isGist ? "Gist" : "Repository",
 
-  return {
-    __typename: isGist ? "Gist" : "Repository",
+      url: url?.toString() ?? "",
+      name,
+      description,
 
-    url: url?.toString() ?? "",
-    name,
-    description,
+      stargazers: { totalCount: starCount },
+      forks: { totalCount: forkCount },
 
-    stargazers: { totalCount: starCount },
-    forks: { totalCount: forkCount },
+      parent,
+    };
+    return info;
+  } else {
+    // Repository
+    const primaryLanguage = extractLangFromDom($, elMetaRow);
 
-    parent,
+    const info: Required<Repository> = {
+      __typename: "Repository",
 
-    languages:
-      !isGist && lang
-        ? { nodes: [{ color: lang.color, name: lang.name }] }
-        : undefined,
-  };
+      url: url?.toString() ?? "",
+      name,
+      description,
+
+      descriptionHTML,
+      forkCount,
+      homepageUrl,
+      isFork,
+
+      stargazers: { totalCount: starCount },
+      forks: { totalCount: forkCount },
+
+      parent,
+
+      primaryLanguage,
+    };
+    return info;
+  }
 };
 
 export function extractUserPinnedItemsFromHtml(
@@ -113,4 +135,11 @@ export function extractUserPinnedItemsFromCheerio(
   ).toArray();
 
   return elms.map((elm) => extractUserPinnedItemFromDom($, elm));
+}
+
+export function filterUserPinnedItemsCheerio(
+  $els: Cheerio,
+  pinnableItemTypes?: ProfileOwnerPinnedItemsArgs["types"],
+): Cheerio {
+  return $els.filter();
 }

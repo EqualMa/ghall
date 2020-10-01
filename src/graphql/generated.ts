@@ -3,7 +3,10 @@ import {
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
-import { UserExtractor } from "../github/crawler";
+import {
+  UserExtractor,
+  PinnableItemConnectionExtractor,
+} from "../github/crawler";
 import { gql } from "@apollo/client";
 import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
@@ -44,7 +47,7 @@ export type Actor = {
 
 /** Represents an object which can take actions on GitHub. Typically a User or Bot. */
 export type ActorAvatarUrlArgs = {
-  size?: Maybe<Scalars["Int"]>;
+  size: Maybe<Scalars["Int"]>;
 };
 
 /** A Gist. */
@@ -53,14 +56,14 @@ export type Gist = Node &
   UniformResourceLocatable & {
     __typename?: "Gist";
     /** The gist description. */
-    description?: Maybe<Scalars["String"]>;
+    description: Maybe<Scalars["String"]>;
     /** A list of forks associated with the gist */
     forks: GistConnection;
     id: Scalars["ID"];
     /** The gist name. */
     name: Scalars["String"];
     /** The gist owner. */
-    owner?: Maybe<RepositoryOwner>;
+    owner: Maybe<RepositoryOwner>;
     /** The HTML path to this resource. */
     resourcePath: Scalars["URI"];
     /** A list of users who have starred this starrable. */
@@ -80,7 +83,7 @@ export type GistConnection = {
 export type Language = {
   __typename?: "Language";
   /** The color defined for the current language. */
-  color?: Maybe<Scalars["String"]>;
+  color: Maybe<Scalars["String"]>;
   /** The name of the current language. */
   name: Scalars["String"];
 };
@@ -91,16 +94,42 @@ export type Node = {
   id: Scalars["ID"];
 };
 
+/** Information about pagination in a connection. */
+export type PageInfo = {
+  __typename?: "PageInfo";
+  /** When paginating forwards, the cursor to continue. */
+  endCursor: Maybe<Scalars["String"]>;
+  /** When paginating forwards, are there more items? */
+  hasNextPage: Scalars["Boolean"];
+  /** When paginating backwards, are there more items? */
+  hasPreviousPage: Scalars["Boolean"];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor: Maybe<Scalars["String"]>;
+};
+
 /** Types that can be pinned to a profile page. */
 export type PinnableItem = Gist | Repository;
 
 /** The connection type for PinnableItem. */
 export type PinnableItemConnection = {
   __typename?: "PinnableItemConnection";
+  /** A list of edges. */
+  edges: Maybe<Array<Maybe<PinnableItemEdge>>>;
   /** A list of nodes. */
-  nodes?: Maybe<Array<Maybe<PinnableItem>>>;
+  nodes: Maybe<Array<Maybe<PinnableItem>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
   /** Identifies the total count of items in the connection. */
   totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type PinnableItemEdge = {
+  __typename?: "PinnableItemEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node: Maybe<PinnableItem>;
 };
 
 /** Represents items that can be pinned to a profile page or dashboard. */
@@ -126,33 +155,33 @@ export enum PinnableItemType {
 /** Represents any entity on GitHub that has a profile page. */
 export type ProfileOwner = {
   /** The public profile email. */
-  email?: Maybe<Scalars["String"]>;
+  email: Maybe<Scalars["String"]>;
   /** The public profile location. */
-  location?: Maybe<Scalars["String"]>;
+  location: Maybe<Scalars["String"]>;
   /** The username used to login. */
   login: Scalars["String"];
   /** The public profile name. */
-  name?: Maybe<Scalars["String"]>;
+  name: Maybe<Scalars["String"]>;
   /** A list of repositories and gists this profile owner has pinned to their profile */
   pinnedItems: PinnableItemConnection;
   /** The public profile website URL. */
-  websiteUrl?: Maybe<Scalars["URI"]>;
+  websiteUrl: Maybe<Scalars["URI"]>;
 };
 
 /** Represents any entity on GitHub that has a profile page. */
 export type ProfileOwnerPinnedItemsArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  types?: Maybe<Array<PinnableItemType>>;
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  types: Maybe<Array<PinnableItemType>>;
 };
 
 /** The query root of GitHub's GraphQL interface. */
 export type Query = {
   __typename?: "Query";
   /** Lookup a user by login. */
-  user?: Maybe<User>;
+  user: Maybe<User>;
 };
 
 /** The query root of GitHub's GraphQL interface. */
@@ -166,15 +195,13 @@ export type Repository = RepositoryInfo &
   UniformResourceLocatable & {
     __typename?: "Repository";
     /** The description of the repository. */
-    description?: Maybe<Scalars["String"]>;
+    description: Maybe<Scalars["String"]>;
     /** The description of the repository rendered to HTML. */
     descriptionHTML: Scalars["HTML"];
     /** Returns how many forks there are of this repository in the whole network. */
     forkCount: Scalars["Int"];
     /** A list of direct forked repositories. */
     forks: RepositoryConnection;
-    /** The repository's URL. */
-    homepageUrl?: Maybe<Scalars["URI"]>;
     /** Identifies if the repository is a fork. */
     isFork: Scalars["Boolean"];
     /** The name of the repository. */
@@ -184,9 +211,9 @@ export type Repository = RepositoryInfo &
     /** The User owner of the repository. */
     owner: RepositoryOwner;
     /** The repository parent, if this is a fork. */
-    parent?: Maybe<Repository>;
+    parent: Maybe<Repository>;
     /** The primary language of the repository's code. */
-    primaryLanguage?: Maybe<Language>;
+    primaryLanguage: Maybe<Language>;
     /** The HTTP path for this repository */
     resourcePath: Scalars["URI"];
     /** A description of the repository, rendered to HTML without any links in it. */
@@ -214,13 +241,11 @@ export type RepositoryConnection = {
 /** A subset of repository info. */
 export type RepositoryInfo = {
   /** The description of the repository. */
-  description?: Maybe<Scalars["String"]>;
+  description: Maybe<Scalars["String"]>;
   /** The description of the repository rendered to HTML. */
   descriptionHTML: Scalars["HTML"];
   /** Returns how many forks there are of this repository in the whole network. */
   forkCount: Scalars["Int"];
-  /** The repository's URL. */
-  homepageUrl?: Maybe<Scalars["URI"]>;
   /** Identifies if the repository is a fork. */
   isFork: Scalars["Boolean"];
   /** The name of the repository. */
@@ -257,7 +282,7 @@ export type RepositoryOwner = {
 
 /** Represents an owner of a Repository. */
 export type RepositoryOwnerAvatarUrlArgs = {
-  size?: Maybe<Scalars["Int"]>;
+  size: Maybe<Scalars["Int"]>;
 };
 
 /** The connection type for User. */
@@ -291,101 +316,102 @@ export type User = Actor &
     /** A URL pointing to the user's public avatar. */
     avatarUrl: Scalars["URI"];
     /** The user's public profile bio. */
-    bio?: Maybe<Scalars["String"]>;
+    bio: Maybe<Scalars["String"]>;
     /** The user's public profile bio as HTML. */
     bioHTML: Scalars["HTML"];
     /** The user's public profile company. */
-    company?: Maybe<Scalars["String"]>;
+    company: Maybe<Scalars["String"]>;
     /** The user's public profile company as HTML. */
     companyHTML: Scalars["HTML"];
     /** Identifies the primary key from the database. */
-    databaseId?: Maybe<Scalars["Int"]>;
+    databaseId: Maybe<Scalars["Int"]>;
     /** The user's publicly visible profile email. */
     email: Scalars["String"];
     id: Scalars["ID"];
     /** The user's public profile location. */
-    location?: Maybe<Scalars["String"]>;
+    location: Maybe<Scalars["String"]>;
     /** The username used to login. */
     login: Scalars["String"];
     /** The user's public profile name. */
-    name?: Maybe<Scalars["String"]>;
+    name: Maybe<Scalars["String"]>;
     /** A list of repositories and gists this profile owner has pinned to their profile */
     pinnedItems: PinnableItemConnection;
     /** The HTTP path for this user */
     resourcePath: Scalars["URI"];
     /** The user's description of what they're currently doing. */
-    status?: Maybe<UserStatus>;
+    status: Maybe<UserStatus>;
     /** The user's Twitter username. */
-    twitterUsername?: Maybe<Scalars["String"]>;
+    twitterUsername: Maybe<Scalars["String"]>;
     /** The HTTP URL for this user */
     url: Scalars["URI"];
     /** A URL pointing to the user's public website/blog. */
-    websiteUrl?: Maybe<Scalars["URI"]>;
+    websiteUrl: Maybe<Scalars["URI"]>;
   };
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type UserAvatarUrlArgs = {
-  size?: Maybe<Scalars["Int"]>;
+  size: Maybe<Scalars["Int"]>;
 };
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type UserPinnedItemsArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  types?: Maybe<Array<PinnableItemType>>;
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  types: Maybe<Array<PinnableItemType>>;
 };
 
 /** The user's description of what they're currently doing. */
 export type UserStatus = {
   __typename?: "UserStatus";
   /** An emoji summarizing the user's status. */
-  emoji?: Maybe<Scalars["String"]>;
+  emoji: Maybe<Scalars["String"]>;
   /** The status emoji as HTML. */
-  emojiHTML?: Maybe<Scalars["HTML"]>;
+  emojiHTML: Maybe<Scalars["HTML"]>;
   /** A brief message describing what the user is doing. */
-  message?: Maybe<Scalars["String"]>;
+  message: Maybe<Scalars["String"]>;
   /** The user who has this status. */
   user: User;
 };
 
-export type UserQueryVariables = Exact<{
+export type UserInfoQueryVariables = Exact<{
   login: Scalars["String"];
+  avatarSize: Maybe<Scalars["Int"]>;
 }>;
 
-export type UserQuery = { __typename?: "Query" } & {
-  user?: Maybe<
+export type UserInfoQuery = { __typename?: "Query" } & {
+  user: Maybe<
     { __typename?: "User" } & Pick<
       User,
+      | "avatarUrl"
+      | "bio"
+      | "bioHTML"
+      | "company"
+      | "companyHTML"
+      | "databaseId"
+      | "email"
+      | "id"
+      | "location"
       | "login"
       | "name"
-      | "bio"
-      | "avatarUrl"
+      | "resourcePath"
+      | "twitterUsername"
       | "url"
       | "websiteUrl"
-      | "location"
-      | "email"
-      | "twitterUsername"
     > & {
-        status?: Maybe<
-          { __typename?: "UserStatus" } & Pick<
-            UserStatus,
-            "emoji" | "message" | "emojiHTML"
-          >
-        >;
         pinnedItems: { __typename?: "PinnableItemConnection" } & Pick<
           PinnableItemConnection,
           "totalCount"
         > & {
-            nodes?: Maybe<
+            nodes: Maybe<
               Array<
                 Maybe<
                   | ({ __typename: "Gist" } & Pick<
                       Gist,
                       "id" | "name" | "url" | "description"
                     > & {
-                        repoOwner?: Maybe<
+                        repoOwner: Maybe<
                           { __typename?: "User" } & Pick<
                             User,
                             "login" | "avatarUrl" | "url"
@@ -397,11 +423,7 @@ export type UserQuery = { __typename?: "Query" } & {
                       })
                   | ({ __typename: "Repository" } & Pick<
                       Repository,
-                      | "name"
-                      | "url"
-                      | "description"
-                      | "forkCount"
-                      | "homepageUrl"
+                      "name" | "url" | "description" | "forkCount"
                     > & {
                         gistOwner: { __typename?: "User" } & Pick<
                           User,
@@ -412,6 +434,12 @@ export type UserQuery = { __typename?: "Query" } & {
               >
             >;
           };
+        status: Maybe<
+          { __typename?: "UserStatus" } & Pick<
+            UserStatus,
+            "emoji" | "emojiHTML" | "message"
+          > & { user: { __typename?: "User" } & Pick<User, "login"> }
+        >;
       }
   >;
 };
@@ -544,17 +572,19 @@ export type ResolversTypes = ResolversObject<{
   HTML: ResolverTypeWrapper<Scalars["HTML"]>;
   Language: ResolverTypeWrapper<Language>;
   Node: ResolversTypes["Gist"] | ResolversTypes["User"];
+  PageInfo: ResolverTypeWrapper<PageInfo>;
+  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   PinnableItem: ResolversTypes["Gist"] | ResolversTypes["Repository"];
-  PinnableItemConnection: ResolverTypeWrapper<
-    Omit<PinnableItemConnection, "nodes"> & {
-      nodes?: Maybe<Array<Maybe<ResolversTypes["PinnableItem"]>>>;
+  PinnableItemConnection: ResolverTypeWrapper<PinnableItemConnectionExtractor>;
+  PinnableItemEdge: ResolverTypeWrapper<
+    Omit<PinnableItemEdge, "node"> & {
+      node: Maybe<ResolversTypes["PinnableItem"]>;
     }
   >;
   PinnableItemType: PinnableItemType;
   ProfileOwner: ResolversTypes["User"];
   Query: ResolverTypeWrapper<{}>;
   Repository: ResolverTypeWrapper<Repository>;
-  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   RepositoryConnection: ResolverTypeWrapper<RepositoryConnection>;
   RepositoryInfo: ResolversTypes["Repository"];
   RepositoryOwner: ResolversTypes["User"];
@@ -583,16 +613,18 @@ export type ResolversParentTypes = ResolversObject<{
   HTML: Scalars["HTML"];
   Language: Language;
   Node: ResolversParentTypes["Gist"] | ResolversParentTypes["User"];
+  PageInfo: PageInfo;
+  Boolean: Scalars["Boolean"];
   PinnableItem:
     | ResolversParentTypes["Gist"]
     | ResolversParentTypes["Repository"];
-  PinnableItemConnection: Omit<PinnableItemConnection, "nodes"> & {
-    nodes?: Maybe<Array<Maybe<ResolversParentTypes["PinnableItem"]>>>;
+  PinnableItemConnection: PinnableItemConnectionExtractor;
+  PinnableItemEdge: Omit<PinnableItemEdge, "node"> & {
+    node: Maybe<ResolversParentTypes["PinnableItem"]>;
   };
   ProfileOwner: ResolversParentTypes["User"];
   Query: {};
   Repository: Repository;
-  Boolean: Scalars["Boolean"];
   RepositoryConnection: RepositoryConnection;
   RepositoryInfo: ResolversParentTypes["Repository"];
   RepositoryOwner: ResolversParentTypes["User"];
@@ -612,41 +644,41 @@ export type ActorResolvers<
   ParentType extends ResolversParentTypes["Actor"] = ResolversParentTypes["Actor"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"User", ParentType, ContextType>;
-  avatarUrl?: Resolver<
+  avatarUrl: Resolver<
     ResolversTypes["URI"],
     ParentType,
     ContextType,
     RequireFields<ActorAvatarUrlArgs, never>
   >;
-  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  login: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
 }>;
 
 export type GistResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Gist"] = ResolversParentTypes["Gist"]
 > = ResolversObject<{
-  description?: Resolver<
+  description: Resolver<
     Maybe<ResolversTypes["String"]>,
     ParentType,
     ContextType
   >;
-  forks?: Resolver<ResolversTypes["GistConnection"], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  owner?: Resolver<
+  forks: Resolver<ResolversTypes["GistConnection"], ParentType, ContextType>;
+  id: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  owner: Resolver<
     Maybe<ResolversTypes["RepositoryOwner"]>,
     ParentType,
     ContextType
   >;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  stargazers?: Resolver<
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
     ContextType
   >;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -654,7 +686,7 @@ export type GistConnectionResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["GistConnection"] = ResolversParentTypes["GistConnection"]
 > = ResolversObject<{
-  totalCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -672,8 +704,8 @@ export type LanguageResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Language"] = ResolversParentTypes["Language"]
 > = ResolversObject<{
-  color?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  color: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -682,7 +714,22 @@ export type NodeResolvers<
   ParentType extends ResolversParentTypes["Node"] = ResolversParentTypes["Node"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"Gist" | "User", ParentType, ContextType>;
-  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  id: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+}>;
+
+export type PageInfoResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["PageInfo"] = ResolversParentTypes["PageInfo"]
+> = ResolversObject<{
+  endCursor: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  hasNextPage: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  hasPreviousPage: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  startCursor: Resolver<
+    Maybe<ResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
 export type PinnableItemResolvers<
@@ -696,12 +743,31 @@ export type PinnableItemConnectionResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["PinnableItemConnection"] = ResolversParentTypes["PinnableItemConnection"]
 > = ResolversObject<{
-  nodes?: Resolver<
+  edges: Resolver<
+    Maybe<Array<Maybe<ResolversTypes["PinnableItemEdge"]>>>,
+    ParentType,
+    ContextType
+  >;
+  nodes: Resolver<
     Maybe<Array<Maybe<ResolversTypes["PinnableItem"]>>>,
     ParentType,
     ContextType
   >;
-  totalCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  pageInfo: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
+  totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+}>;
+
+export type PinnableItemEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["PinnableItemEdge"] = ResolversParentTypes["PinnableItemEdge"]
+> = ResolversObject<{
+  cursor: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  node: Resolver<
+    Maybe<ResolversTypes["PinnableItem"]>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -710,24 +776,24 @@ export type ProfileOwnerResolvers<
   ParentType extends ResolversParentTypes["ProfileOwner"] = ResolversParentTypes["ProfileOwner"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"User", ParentType, ContextType>;
-  email?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  location?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  pinnedItems?: Resolver<
+  email: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  location: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  login: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  name: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  pinnedItems: Resolver<
     ResolversTypes["PinnableItemConnection"],
     ParentType,
     ContextType,
     RequireFields<ProfileOwnerPinnedItemsArgs, never>
   >;
-  websiteUrl?: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
+  websiteUrl: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
 }>;
 
 export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = ResolversObject<{
-  user?: Resolver<
+  user: Resolver<
     Maybe<ResolversTypes["User"]>,
     ParentType,
     ContextType,
@@ -739,47 +805,46 @@ export type RepositoryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Repository"] = ResolversParentTypes["Repository"]
 > = ResolversObject<{
-  description?: Resolver<
+  description: Resolver<
     Maybe<ResolversTypes["String"]>,
     ParentType,
     ContextType
   >;
-  descriptionHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
-  forkCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  forks?: Resolver<
+  descriptionHTML: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
+  forkCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  forks: Resolver<
     ResolversTypes["RepositoryConnection"],
     ParentType,
     ContextType
   >;
-  homepageUrl?: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
-  isFork?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  nameWithOwner?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  owner?: Resolver<ResolversTypes["RepositoryOwner"], ParentType, ContextType>;
-  parent?: Resolver<
+  isFork: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  nameWithOwner: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  owner: Resolver<ResolversTypes["RepositoryOwner"], ParentType, ContextType>;
+  parent: Resolver<
     Maybe<ResolversTypes["Repository"]>,
     ParentType,
     ContextType
   >;
-  primaryLanguage?: Resolver<
+  primaryLanguage: Resolver<
     Maybe<ResolversTypes["Language"]>,
     ParentType,
     ContextType
   >;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  shortDescriptionHTML?: Resolver<
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  shortDescriptionHTML: Resolver<
     ResolversTypes["HTML"],
     ParentType,
     ContextType,
     RequireFields<RepositoryShortDescriptionHtmlArgs, "limit">
   >;
-  sshUrl?: Resolver<ResolversTypes["GitSSHRemote"], ParentType, ContextType>;
-  stargazers?: Resolver<
+  sshUrl: Resolver<ResolversTypes["GitSSHRemote"], ParentType, ContextType>;
+  stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
     ContextType
   >;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -787,7 +852,7 @@ export type RepositoryConnectionResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["RepositoryConnection"] = ResolversParentTypes["RepositoryConnection"]
 > = ResolversObject<{
-  totalCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -796,26 +861,25 @@ export type RepositoryInfoResolvers<
   ParentType extends ResolversParentTypes["RepositoryInfo"] = ResolversParentTypes["RepositoryInfo"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"Repository", ParentType, ContextType>;
-  description?: Resolver<
+  description: Resolver<
     Maybe<ResolversTypes["String"]>,
     ParentType,
     ContextType
   >;
-  descriptionHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
-  forkCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  homepageUrl?: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
-  isFork?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  nameWithOwner?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  owner?: Resolver<ResolversTypes["RepositoryOwner"], ParentType, ContextType>;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  shortDescriptionHTML?: Resolver<
+  descriptionHTML: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
+  forkCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  isFork: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  nameWithOwner: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  owner: Resolver<ResolversTypes["RepositoryOwner"], ParentType, ContextType>;
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  shortDescriptionHTML: Resolver<
     ResolversTypes["HTML"],
     ParentType,
     ContextType,
     RequireFields<RepositoryInfoShortDescriptionHtmlArgs, "limit">
   >;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
 }>;
 
 export type RepositoryOwnerResolvers<
@@ -823,23 +887,23 @@ export type RepositoryOwnerResolvers<
   ParentType extends ResolversParentTypes["RepositoryOwner"] = ResolversParentTypes["RepositoryOwner"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"User", ParentType, ContextType>;
-  avatarUrl?: Resolver<
+  avatarUrl: Resolver<
     ResolversTypes["URI"],
     ParentType,
     ContextType,
     RequireFields<RepositoryOwnerAvatarUrlArgs, never>
   >;
-  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  id: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  login: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
 }>;
 
 export type StargazerConnectionResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["StargazerConnection"] = ResolversParentTypes["StargazerConnection"]
 > = ResolversObject<{
-  totalCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -848,7 +912,7 @@ export type StarrableResolvers<
   ParentType extends ResolversParentTypes["Starrable"] = ResolversParentTypes["Starrable"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"Gist" | "Repository", ParentType, ContextType>;
-  stargazers?: Resolver<
+  stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
     ContextType
@@ -869,49 +933,49 @@ export type UniformResourceLocatableResolvers<
     ParentType,
     ContextType
   >;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
 }>;
 
 export type UserResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
 > = ResolversObject<{
-  avatarUrl?: Resolver<
+  avatarUrl: Resolver<
     ResolversTypes["URI"],
     ParentType,
     ContextType,
     RequireFields<UserAvatarUrlArgs, never>
   >;
-  bio?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  bioHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
-  company?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  companyHTML?: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
-  databaseId?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  location?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  login?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  pinnedItems?: Resolver<
+  bio: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  bioHTML: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
+  company: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  companyHTML: Resolver<ResolversTypes["HTML"], ParentType, ContextType>;
+  databaseId: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  email: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  id: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  location: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  login: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  name: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  pinnedItems: Resolver<
     ResolversTypes["PinnableItemConnection"],
     ParentType,
     ContextType,
     RequireFields<UserPinnedItemsArgs, never>
   >;
-  resourcePath?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  status?: Resolver<
+  resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  status: Resolver<
     Maybe<ResolversTypes["UserStatus"]>,
     ParentType,
     ContextType
   >;
-  twitterUsername?: Resolver<
+  twitterUsername: Resolver<
     Maybe<ResolversTypes["String"]>,
     ParentType,
     ContextType
   >;
-  url?: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  websiteUrl?: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
+  url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  websiteUrl: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -919,35 +983,37 @@ export type UserStatusResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["UserStatus"] = ResolversParentTypes["UserStatus"]
 > = ResolversObject<{
-  emoji?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  emojiHTML?: Resolver<Maybe<ResolversTypes["HTML"]>, ParentType, ContextType>;
-  message?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  emoji: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  emojiHTML: Resolver<Maybe<ResolversTypes["HTML"]>, ParentType, ContextType>;
+  message: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  user: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
-  Actor?: ActorResolvers<ContextType>;
-  Gist?: GistResolvers<ContextType>;
-  GistConnection?: GistConnectionResolvers<ContextType>;
-  GitSSHRemote?: GraphQLScalarType;
-  HTML?: GraphQLScalarType;
-  Language?: LanguageResolvers<ContextType>;
-  Node?: NodeResolvers<ContextType>;
-  PinnableItem?: PinnableItemResolvers<ContextType>;
-  PinnableItemConnection?: PinnableItemConnectionResolvers<ContextType>;
-  ProfileOwner?: ProfileOwnerResolvers<ContextType>;
-  Query?: QueryResolvers<ContextType>;
-  Repository?: RepositoryResolvers<ContextType>;
-  RepositoryConnection?: RepositoryConnectionResolvers<ContextType>;
-  RepositoryInfo?: RepositoryInfoResolvers<ContextType>;
-  RepositoryOwner?: RepositoryOwnerResolvers<ContextType>;
-  StargazerConnection?: StargazerConnectionResolvers<ContextType>;
-  Starrable?: StarrableResolvers<ContextType>;
-  URI?: GraphQLScalarType;
-  UniformResourceLocatable?: UniformResourceLocatableResolvers<ContextType>;
-  User?: UserResolvers<ContextType>;
-  UserStatus?: UserStatusResolvers<ContextType>;
+  Actor: ActorResolvers<ContextType>;
+  Gist: GistResolvers<ContextType>;
+  GistConnection: GistConnectionResolvers<ContextType>;
+  GitSSHRemote: GraphQLScalarType;
+  HTML: GraphQLScalarType;
+  Language: LanguageResolvers<ContextType>;
+  Node: NodeResolvers<ContextType>;
+  PageInfo: PageInfoResolvers<ContextType>;
+  PinnableItem: PinnableItemResolvers<ContextType>;
+  PinnableItemConnection: PinnableItemConnectionResolvers<ContextType>;
+  PinnableItemEdge: PinnableItemEdgeResolvers<ContextType>;
+  ProfileOwner: ProfileOwnerResolvers<ContextType>;
+  Query: QueryResolvers<ContextType>;
+  Repository: RepositoryResolvers<ContextType>;
+  RepositoryConnection: RepositoryConnectionResolvers<ContextType>;
+  RepositoryInfo: RepositoryInfoResolvers<ContextType>;
+  RepositoryOwner: RepositoryOwnerResolvers<ContextType>;
+  StargazerConnection: StargazerConnectionResolvers<ContextType>;
+  Starrable: StarrableResolvers<ContextType>;
+  URI: GraphQLScalarType;
+  UniformResourceLocatable: UniformResourceLocatableResolvers<ContextType>;
+  User: UserResolvers<ContextType>;
+  UserStatus: UserStatusResolvers<ContextType>;
 }>;
 
 /**
@@ -956,23 +1022,20 @@ export type Resolvers<ContextType = any> = ResolversObject<{
  */
 export type IResolvers<ContextType = any> = Resolvers<ContextType>;
 
-export const UserDocument = gql`
-  query user($login: String!) {
+export const UserInfoDocument = gql`
+  query userInfo($login: String!, $avatarSize: Int) {
     user(login: $login) {
+      avatarUrl(size: $avatarSize)
+      bio
+      bioHTML
+      company
+      companyHTML
+      databaseId
+      email
+      id
+      location
       login
       name
-      bio
-      avatarUrl
-      url
-      websiteUrl
-      location
-      email
-      status {
-        emoji
-        message
-        emojiHTML
-      }
-      twitterUsername
       pinnedItems(first: 6) {
         totalCount
         nodes {
@@ -987,7 +1050,6 @@ export const UserDocument = gql`
               url
             }
             forkCount
-            homepageUrl
           }
           ... on Gist {
             __typename
@@ -1006,42 +1068,63 @@ export const UserDocument = gql`
           }
         }
       }
+      resourcePath
+      status {
+        emoji
+        emojiHTML
+        message
+        user {
+          login
+        }
+      }
+      twitterUsername
+      url
+      websiteUrl
     }
   }
 `;
 
 /**
- * __useUserQuery__
+ * __useUserInfoQuery__
  *
- * To run a query within a React component, call `useUserQuery` and pass it any options that fit your needs.
- * When your component renders, `useUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useUserInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useUserQuery({
+ * const { data, loading, error } = useUserInfoQuery({
  *   variables: {
  *      login: // value for 'login'
+ *      avatarSize: // value for 'avatarSize'
  *   },
  * });
  */
-export function useUserQuery(
-  baseOptions?: Apollo.QueryHookOptions<UserQuery, UserQueryVariables>,
+export function useUserInfoQuery(
+  baseOptions?: Apollo.QueryHookOptions<UserInfoQuery, UserInfoQueryVariables>,
 ) {
-  return Apollo.useQuery<UserQuery, UserQueryVariables>(
-    UserDocument,
+  return Apollo.useQuery<UserInfoQuery, UserInfoQueryVariables>(
+    UserInfoDocument,
     baseOptions,
   );
 }
-export function useUserLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<UserQuery, UserQueryVariables>,
+export function useUserInfoLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UserInfoQuery,
+    UserInfoQueryVariables
+  >,
 ) {
-  return Apollo.useLazyQuery<UserQuery, UserQueryVariables>(
-    UserDocument,
+  return Apollo.useLazyQuery<UserInfoQuery, UserInfoQueryVariables>(
+    UserInfoDocument,
     baseOptions,
   );
 }
-export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
-export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
-export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
+export type UserInfoQueryHookResult = ReturnType<typeof useUserInfoQuery>;
+export type UserInfoLazyQueryHookResult = ReturnType<
+  typeof useUserInfoLazyQuery
+>;
+export type UserInfoQueryResult = Apollo.QueryResult<
+  UserInfoQuery,
+  UserInfoQueryVariables
+>;

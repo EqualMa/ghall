@@ -6,8 +6,10 @@ generates:
     config:
       # https://graphql-code-generator.com/docs/plugins/typescript-resolvers#integration-with-apollo-server
       useIndexSignature: true
+      avoidOptionals: true
       mappers:
         User: ../github/crawler#UserExtractor
+        PinnableItemConnection: ../github/crawler#PinnableItemConnectionExtractor
     plugins:
       - "typescript"
       - "typescript-operations"

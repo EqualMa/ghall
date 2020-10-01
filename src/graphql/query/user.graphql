@@ -26,7 +26,6 @@ query userInfo($login: String!, $avatarSize: Int) {
             url
           }
           forkCount
-          homepageUrl
         }
         ... on Gist {
           __typename
@@ -51,7 +50,9 @@ query userInfo($login: String!, $avatarSize: Int) {
       emoji
       emojiHTML
       message
-      user
+      user {
+        login
+      }
     }
     twitterUsername
     url

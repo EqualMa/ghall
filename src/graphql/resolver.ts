@@ -12,6 +12,7 @@ const resolvers: Resolvers = {
   },
   User: {
     avatarUrl: (e, args) => e.getAvatarUrl(args.size),
+    pinnedItems: (e, args) => e.getPinnedItemsConnection(args),
   },
   Node: {
     __resolveType: (parent) => {
