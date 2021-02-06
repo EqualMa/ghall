@@ -6,6 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "schema:lint": "prettier -w schema.ghack.graphql",
+    "schema:gen": "ts-node scripts/update-schema/main && yarn run schema:lint",
+    "schema:update": "ts-node scripts/update-schema/main --download && yarn run schema:lint",
     "gen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
@@ -37,6 +40,7 @@
     "@types/webpack": "^4.41.26",
     "@types/yup": "^0.29.6",
     "prettier": "^2.1.1",
+    "ts-node": "^9.1.1",
     "typescript": "^4.0.2"
   }
 }
