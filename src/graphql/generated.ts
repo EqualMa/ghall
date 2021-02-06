@@ -66,11 +66,31 @@ export type Gist = Node &
     owner: Maybe<RepositoryOwner>;
     /** The HTML path to this resource. */
     resourcePath: Scalars["URI"];
+    /** Returns a count of how many stargazers there are on this object */
+    stargazerCount: Scalars["Int"];
     /** A list of users who have starred this starrable. */
     stargazers: StargazerConnection;
     /** The HTTP URL for this Gist. */
     url: Scalars["URI"];
   };
+
+/** A Gist. */
+export type GistForksArgs = {
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  orderBy: Maybe<GistOrder>;
+};
+
+/** A Gist. */
+export type GistStargazersArgs = {
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  orderBy: Maybe<StarOrder>;
+};
 
 /** The connection type for Gist. */
 export type GistConnection = {
@@ -78,6 +98,24 @@ export type GistConnection = {
   /** Identifies the total count of items in the connection. */
   totalCount: Scalars["Int"];
 };
+
+/** Ordering options for gist connections */
+export type GistOrder = {
+  /** The ordering direction. */
+  direction: OrderDirection;
+  /** The field to order repositories by. */
+  field: GistOrderField;
+};
+
+/** Properties by which gist connections can be ordered. */
+export enum GistOrderField {
+  /** Order gists by creation time */
+  CreatedAt = "CREATED_AT",
+  /** Order gists by push time */
+  PushedAt = "PUSHED_AT",
+  /** Order gists by update time */
+  UpdatedAt = "UPDATED_AT",
+}
 
 /** Represents a given language found in repositories. */
 export type Language = {
@@ -93,6 +131,14 @@ export type Node = {
   /** ID of the object. */
   id: Scalars["ID"];
 };
+
+/** Possible directions in which to order a list of items when provided an `orderBy` argument. */
+export enum OrderDirection {
+  /** Specifies an ascending order for a given `orderBy` argument. */
+  Asc = "ASC",
+  /** Specifies a descending order for a given `orderBy` argument. */
+  Desc = "DESC",
+}
 
 /** Information about pagination in a connection. */
 export type PageInfo = {
@@ -220,6 +266,8 @@ export type Repository = RepositoryInfo &
     shortDescriptionHTML: Scalars["HTML"];
     /** The SSH URL to clone this repository */
     sshUrl: Scalars["GitSSHRemote"];
+    /** Returns a count of how many stargazers there are on this object */
+    stargazerCount: Scalars["Int"];
     /** A list of users who have starred this starrable. */
     stargazers: StargazerConnection;
     /** The HTTP URL for this repository */
@@ -227,9 +275,44 @@ export type Repository = RepositoryInfo &
   };
 
 /** A repository contains the content for a project. */
+export type RepositoryForksArgs = {
+  affiliations: Maybe<Array<Maybe<RepositoryAffiliation>>>;
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  isLocked: Maybe<Scalars["Boolean"]>;
+  last: Maybe<Scalars["Int"]>;
+  orderBy: Maybe<RepositoryOrder>;
+  ownerAffiliations?: Maybe<Array<Maybe<RepositoryAffiliation>>>;
+  privacy: Maybe<RepositoryPrivacy>;
+};
+
+/** A repository contains the content for a project. */
 export type RepositoryShortDescriptionHtmlArgs = {
   limit?: Maybe<Scalars["Int"]>;
 };
+
+/** A repository contains the content for a project. */
+export type RepositoryStargazersArgs = {
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  orderBy: Maybe<StarOrder>;
+};
+
+/** The affiliation of a user to a repository */
+export enum RepositoryAffiliation {
+  /** Repositories that the user has been added to as a collaborator. */
+  Collaborator = "COLLABORATOR",
+  /**
+   * Repositories that the user has access to through being a member of an
+   * organization. This includes every repository on every team that the user is on.
+   */
+  OrganizationMember = "ORGANIZATION_MEMBER",
+  /** Repositories that are owned by the authenticated user. */
+  Owner = "OWNER",
+}
 
 /** A list of repositories owned by the subject. */
 export type RepositoryConnection = {
@@ -267,6 +350,28 @@ export type RepositoryInfoShortDescriptionHtmlArgs = {
   limit?: Maybe<Scalars["Int"]>;
 };
 
+/** Ordering options for repository connections */
+export type RepositoryOrder = {
+  /** The ordering direction. */
+  direction: OrderDirection;
+  /** The field to order repositories by. */
+  field: RepositoryOrderField;
+};
+
+/** Properties by which repository connections can be ordered. */
+export enum RepositoryOrderField {
+  /** Order repositories by creation time */
+  CreatedAt = "CREATED_AT",
+  /** Order repositories by name */
+  Name = "NAME",
+  /** Order repositories by push time */
+  PushedAt = "PUSHED_AT",
+  /** Order repositories by number of stargazers */
+  Stargazers = "STARGAZERS",
+  /** Order repositories by update time */
+  UpdatedAt = "UPDATED_AT",
+}
+
 /** Represents an owner of a Repository. */
 export type RepositoryOwner = {
   /** A URL pointing to the owner's public avatar. */
@@ -285,6 +390,28 @@ export type RepositoryOwnerAvatarUrlArgs = {
   size: Maybe<Scalars["Int"]>;
 };
 
+/** The privacy of a repository */
+export enum RepositoryPrivacy {
+  /** Private */
+  Private = "PRIVATE",
+  /** Public */
+  Public = "PUBLIC",
+}
+
+/** Ways in which star connections can be ordered. */
+export type StarOrder = {
+  /** The direction in which to order nodes. */
+  direction: OrderDirection;
+  /** The field in which to order nodes by. */
+  field: StarOrderField;
+};
+
+/** Properties by which star connections can be ordered. */
+export enum StarOrderField {
+  /** Allows ordering a list of stars by when they were created. */
+  StarredAt = "STARRED_AT",
+}
+
 /** The connection type for User. */
 export type StargazerConnection = {
   __typename?: "StargazerConnection";
@@ -294,8 +421,19 @@ export type StargazerConnection = {
 
 /** Things that can be starred. */
 export type Starrable = {
+  /** Returns a count of how many stargazers there are on this object */
+  stargazerCount: Scalars["Int"];
   /** A list of users who have starred this starrable. */
   stargazers: StargazerConnection;
+};
+
+/** Things that can be starred. */
+export type StarrableStargazersArgs = {
+  after: Maybe<Scalars["String"]>;
+  before: Maybe<Scalars["String"]>;
+  first: Maybe<Scalars["Int"]>;
+  last: Maybe<Scalars["Int"]>;
+  orderBy: Maybe<StarOrder>;
 };
 
 /** Represents a type that can be retrieved by a URL. */
@@ -568,10 +706,13 @@ export type ResolversTypes = ResolversObject<{
   Gist: ResolverTypeWrapper<Gist>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   GistConnection: ResolverTypeWrapper<GistConnection>;
+  GistOrder: GistOrder;
+  GistOrderField: GistOrderField;
   GitSSHRemote: ResolverTypeWrapper<Scalars["GitSSHRemote"]>;
   HTML: ResolverTypeWrapper<Scalars["HTML"]>;
   Language: ResolverTypeWrapper<Language>;
   Node: ResolversTypes["Gist"] | ResolversTypes["User"];
+  OrderDirection: OrderDirection;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   PinnableItem: ResolversTypes["Gist"] | ResolversTypes["Repository"];
@@ -585,9 +726,15 @@ export type ResolversTypes = ResolversObject<{
   ProfileOwner: ResolversTypes["User"];
   Query: ResolverTypeWrapper<{}>;
   Repository: ResolverTypeWrapper<Repository>;
+  RepositoryAffiliation: RepositoryAffiliation;
   RepositoryConnection: ResolverTypeWrapper<RepositoryConnection>;
   RepositoryInfo: ResolversTypes["Repository"];
+  RepositoryOrder: RepositoryOrder;
+  RepositoryOrderField: RepositoryOrderField;
   RepositoryOwner: ResolversTypes["User"];
+  RepositoryPrivacy: RepositoryPrivacy;
+  StarOrder: StarOrder;
+  StarOrderField: StarOrderField;
   StargazerConnection: ResolverTypeWrapper<StargazerConnection>;
   Starrable: ResolversTypes["Gist"] | ResolversTypes["Repository"];
   URI: ResolverTypeWrapper<Scalars["URI"]>;
@@ -609,6 +756,7 @@ export type ResolversParentTypes = ResolversObject<{
   Gist: Gist;
   ID: Scalars["ID"];
   GistConnection: GistConnection;
+  GistOrder: GistOrder;
   GitSSHRemote: Scalars["GitSSHRemote"];
   HTML: Scalars["HTML"];
   Language: Language;
@@ -627,7 +775,9 @@ export type ResolversParentTypes = ResolversObject<{
   Repository: Repository;
   RepositoryConnection: RepositoryConnection;
   RepositoryInfo: ResolversParentTypes["Repository"];
+  RepositoryOrder: RepositoryOrder;
   RepositoryOwner: ResolversParentTypes["User"];
+  StarOrder: StarOrder;
   StargazerConnection: StargazerConnection;
   Starrable: ResolversParentTypes["Gist"] | ResolversParentTypes["Repository"];
   URI: Scalars["URI"];
@@ -664,7 +814,12 @@ export type GistResolvers<
     ParentType,
     ContextType
   >;
-  forks: Resolver<ResolversTypes["GistConnection"], ParentType, ContextType>;
+  forks: Resolver<
+    ResolversTypes["GistConnection"],
+    ParentType,
+    ContextType,
+    RequireFields<GistForksArgs, never>
+  >;
   id: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   owner: Resolver<
@@ -673,10 +828,12 @@ export type GistResolvers<
     ContextType
   >;
   resourcePath: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
+  stargazerCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
-    ContextType
+    ContextType,
+    RequireFields<GistStargazersArgs, never>
   >;
   url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
@@ -815,7 +972,8 @@ export type RepositoryResolvers<
   forks: Resolver<
     ResolversTypes["RepositoryConnection"],
     ParentType,
-    ContextType
+    ContextType,
+    RequireFields<RepositoryForksArgs, "ownerAffiliations">
   >;
   isFork: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
   name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
@@ -839,10 +997,12 @@ export type RepositoryResolvers<
     RequireFields<RepositoryShortDescriptionHtmlArgs, "limit">
   >;
   sshUrl: Resolver<ResolversTypes["GitSSHRemote"], ParentType, ContextType>;
+  stargazerCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
-    ContextType
+    ContextType,
+    RequireFields<RepositoryStargazersArgs, never>
   >;
   url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
@@ -912,10 +1072,12 @@ export type StarrableResolvers<
   ParentType extends ResolversParentTypes["Starrable"] = ResolversParentTypes["Starrable"]
 > = ResolversObject<{
   __resolveType: TypeResolveFn<"Gist" | "Repository", ParentType, ContextType>;
+  stargazerCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   stargazers: Resolver<
     ResolversTypes["StargazerConnection"],
     ParentType,
-    ContextType
+    ContextType,
+    RequireFields<StarrableStargazersArgs, never>
   >;
 }>;
 

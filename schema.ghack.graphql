@@ -117,6 +117,38 @@ type GistConnection {
 }
 
 """
+Ordering options for gist connections
+"""
+input GistOrder {
+  """
+  The ordering direction.
+  """
+  direction: OrderDirection!
+  """
+  The field to order repositories by.
+  """
+  field: GistOrderField!
+}
+
+"""
+Properties by which gist connections can be ordered.
+"""
+enum GistOrderField {
+  """
+  Order gists by creation time
+  """
+  CREATED_AT
+  """
+  Order gists by push time
+  """
+  PUSHED_AT
+  """
+  Order gists by update time
+  """
+  UPDATED_AT
+}
+
+"""
 Git SSH string
 """
 scalar GitSSHRemote
@@ -148,6 +180,20 @@ interface Node {
   ID of the object.
   """
   id: ID!
+}
+
+"""
+Possible directions in which to order a list of items when provided an `orderBy` argument.
+"""
+enum OrderDirection {
+  """
+  Specifies an ascending order for a given `orderBy` argument.
+  """
+  ASC
+  """
+  Specifies a descending order for a given `orderBy` argument.
+  """
+  DESC
 }
 
 """
@@ -455,6 +501,25 @@ type Repository implements RepositoryInfo & Starrable & UniformResourceLocatable
 }
 
 """
+The affiliation of a user to a repository
+"""
+enum RepositoryAffiliation {
+  """
+  Repositories that the user has been added to as a collaborator.
+  """
+  COLLABORATOR
+  """
+  Repositories that the user has access to through being a member of an
+  organization. This includes every repository on every team that the user is on.
+  """
+  ORGANIZATION_MEMBER
+  """
+  Repositories that are owned by the authenticated user.
+  """
+  OWNER
+}
+
+"""
 A list of repositories owned by the subject.
 """
 type RepositoryConnection {
@@ -516,6 +581,46 @@ interface RepositoryInfo {
 }
 
 """
+Ordering options for repository connections
+"""
+input RepositoryOrder {
+  """
+  The ordering direction.
+  """
+  direction: OrderDirection!
+  """
+  The field to order repositories by.
+  """
+  field: RepositoryOrderField!
+}
+
+"""
+Properties by which repository connections can be ordered.
+"""
+enum RepositoryOrderField {
+  """
+  Order repositories by creation time
+  """
+  CREATED_AT
+  """
+  Order repositories by name
+  """
+  NAME
+  """
+  Order repositories by push time
+  """
+  PUSHED_AT
+  """
+  Order repositories by number of stargazers
+  """
+  STARGAZERS
+  """
+  Order repositories by update time
+  """
+  UPDATED_AT
+}
+
+"""
 Represents an owner of a Repository.
 """
 interface RepositoryOwner {
@@ -541,6 +646,44 @@ interface RepositoryOwner {
   The HTTP URL for the owner.
   """
   url: URI!
+}
+
+"""
+The privacy of a repository
+"""
+enum RepositoryPrivacy {
+  """
+  Private
+  """
+  PRIVATE
+  """
+  Public
+  """
+  PUBLIC
+}
+
+"""
+Ways in which star connections can be ordered.
+"""
+input StarOrder {
+  """
+  The direction in which to order nodes.
+  """
+  direction: OrderDirection!
+  """
+  The field in which to order nodes by.
+  """
+  field: StarOrderField!
+}
+
+"""
+Properties by which star connections can be ordered.
+"""
+enum StarOrderField {
+  """
+  Allows ordering a list of stars by when they were created.
+  """
+  STARRED_AT
 }
 
 """
