@@ -11,17 +11,14 @@ interface Actor {
     """
     size: Int
   ): URI!
-
   """
   The username of the actor.
   """
   login: String!
-
   """
   The HTTP path for this actor.
   """
   resourcePath: URI!
-
   """
   The HTTP URL for this actor.
   """
@@ -36,33 +33,73 @@ type Gist implements Node & Starrable & UniformResourceLocatable {
   The gist description.
   """
   description: String
-
   """
   A list of forks associated with the gist
   """
-  forks: GistConnection!
+  forks(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+    """
+    Ordering options for gists returned from the connection
+    """
+    orderBy: GistOrder
+  ): GistConnection!
   id: ID!
-
   """
   The gist name.
   """
   name: String!
-
   """
   The gist owner.
   """
   owner: RepositoryOwner
-
   """
   The HTML path to this resource.
   """
   resourcePath: URI!
-
+  """
+  Returns a count of how many stargazers there are on this object
+  """
+  stargazerCount: Int!
   """
   A list of users who have starred this starrable.
   """
-  stargazers: StargazerConnection!
-
+  stargazers(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+    """
+    Order for connection
+    """
+    orderBy: StarOrder
+  ): StargazerConnection!
   """
   The HTTP URL for this Gist.
   """
@@ -97,7 +134,6 @@ type Language {
   The color defined for the current language.
   """
   color: String
-
   """
   The name of the current language.
   """
@@ -122,17 +158,14 @@ type PageInfo {
   When paginating forwards, the cursor to continue.
   """
   endCursor: String
-
   """
   When paginating forwards, are there more items?
   """
   hasNextPage: Boolean!
-
   """
   When paginating backwards, are there more items?
   """
   hasPreviousPage: Boolean!
-
   """
   When paginating backwards, the cursor to continue.
   """
@@ -152,17 +185,14 @@ type PinnableItemConnection {
   A list of edges.
   """
   edges: [PinnableItemEdge]
-
   """
   A list of nodes.
   """
   nodes: [PinnableItem]
-
   """
   Information to aid in pagination.
   """
   pageInfo: PageInfo!
-
   """
   Identifies the total count of items in the connection.
   """
@@ -177,7 +207,6 @@ type PinnableItemEdge {
   A cursor for use in pagination.
   """
   cursor: String!
-
   """
   The item at the end of the edge.
   """
@@ -192,37 +221,30 @@ enum PinnableItemType {
   A gist.
   """
   GIST
-
   """
   An issue.
   """
   ISSUE
-
   """
   An organization.
   """
   ORGANIZATION
-
   """
   A project.
   """
   PROJECT
-
   """
   A pull request.
   """
   PULL_REQUEST
-
   """
   A repository.
   """
   REPOSITORY
-
   """
   A team.
   """
   TEAM
-
   """
   A user.
   """
@@ -237,22 +259,18 @@ interface ProfileOwner {
   The public profile email.
   """
   email: String
-
   """
   The public profile location.
   """
   location: String
-
   """
   The username used to login.
   """
   login: String!
-
   """
   The public profile name.
   """
   name: String
-
   """
   A list of repositories and gists this profile owner has pinned to their profile
   """
@@ -261,28 +279,23 @@ interface ProfileOwner {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
-
     """
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
-
     """
     Returns the first _n_ elements from the list.
     """
     first: Int
-
     """
     Returns the last _n_ elements from the list.
     """
     last: Int
-
     """
     Filter the types of pinned items that are returned.
     """
     types: [PinnableItemType!]
   ): PinnableItemConnection!
-
   """
   The public profile website URL.
   """
@@ -312,57 +325,87 @@ type Repository implements RepositoryInfo & Starrable & UniformResourceLocatable
   The description of the repository.
   """
   description: String
-
   """
   The description of the repository rendered to HTML.
   """
   descriptionHTML: HTML!
-
   """
   Returns how many forks there are of this repository in the whole network.
   """
   forkCount: Int!
-
   """
   A list of direct forked repositories.
   """
-  forks: RepositoryConnection!
-
+  forks(
+    """
+    Array of viewer's affiliation options for repositories returned from the
+    connection. For example, OWNER will include only repositories that the
+    current viewer owns.
+    """
+    affiliations: [RepositoryAffiliation]
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+    """
+    If non-null, filters repositories according to whether they have been locked
+    """
+    isLocked: Boolean
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+    """
+    Ordering options for repositories returned from the connection
+    """
+    orderBy: RepositoryOrder
+    """
+    Array of owner's affiliation options for repositories returned from the
+    connection. For example, OWNER will include only repositories that the
+    organization or user being viewed owns.
+    """
+    ownerAffiliations: [RepositoryAffiliation] = [OWNER, COLLABORATOR]
+    """
+    If non-null, filters repositories according to privacy
+    """
+    privacy: RepositoryPrivacy
+  ): RepositoryConnection!
   """
   Identifies if the repository is a fork.
   """
   isFork: Boolean!
-
   """
   The name of the repository.
   """
   name: String!
-
   """
   The repository's name with owner.
   """
   nameWithOwner: String!
-
   """
   The User owner of the repository.
   """
   owner: RepositoryOwner!
-
   """
   The repository parent, if this is a fork.
   """
   parent: Repository
-
   """
   The primary language of the repository's code.
   """
   primaryLanguage: Language
-
   """
   The HTTP path for this repository
   """
   resourcePath: URI!
-
   """
   A description of the repository, rendered to HTML without any links in it.
   """
@@ -372,17 +415,39 @@ type Repository implements RepositoryInfo & Starrable & UniformResourceLocatable
     """
     limit: Int = 200
   ): HTML!
-
   """
   The SSH URL to clone this repository
   """
   sshUrl: GitSSHRemote!
-
+  """
+  Returns a count of how many stargazers there are on this object
+  """
+  stargazerCount: Int!
   """
   A list of users who have starred this starrable.
   """
-  stargazers: StargazerConnection!
-
+  stargazers(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+    """
+    Order for connection
+    """
+    orderBy: StarOrder
+  ): StargazerConnection!
   """
   The HTTP URL for this repository
   """
@@ -407,42 +472,34 @@ interface RepositoryInfo {
   The description of the repository.
   """
   description: String
-
   """
   The description of the repository rendered to HTML.
   """
   descriptionHTML: HTML!
-
   """
   Returns how many forks there are of this repository in the whole network.
   """
   forkCount: Int!
-
   """
   Identifies if the repository is a fork.
   """
   isFork: Boolean!
-
   """
   The name of the repository.
   """
   name: String!
-
   """
   The repository's name with owner.
   """
   nameWithOwner: String!
-
   """
   The User owner of the repository.
   """
   owner: RepositoryOwner!
-
   """
   The HTTP path for this repository
   """
   resourcePath: URI!
-
   """
   A description of the repository, rendered to HTML without any links in it.
   """
@@ -452,7 +509,6 @@ interface RepositoryInfo {
     """
     limit: Int = 200
   ): HTML!
-
   """
   The HTTP URL for this repository
   """
@@ -473,17 +529,14 @@ interface RepositoryOwner {
     size: Int
   ): URI!
   id: ID!
-
   """
   The username used to login.
   """
   login: String!
-
   """
   The HTTP URL for the owner.
   """
   resourcePath: URI!
-
   """
   The HTTP URL for the owner.
   """
@@ -505,9 +558,34 @@ Things that can be starred.
 """
 interface Starrable {
   """
+  Returns a count of how many stargazers there are on this object
+  """
+  stargazerCount: Int!
+  """
   A list of users who have starred this starrable.
   """
-  stargazers: StargazerConnection!
+  stargazers(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+    """
+    Order for connection
+    """
+    orderBy: StarOrder
+  ): StargazerConnection!
 }
 
 """
@@ -523,7 +601,6 @@ interface UniformResourceLocatable {
   The HTML path to this resource.
   """
   resourcePath: URI!
-
   """
   The URL to this resource.
   """
@@ -543,54 +620,43 @@ type User implements Actor & Node & ProfileOwner & RepositoryOwner & UniformReso
     """
     size: Int
   ): URI!
-
   """
   The user's public profile bio.
   """
   bio: String
-
   """
   The user's public profile bio as HTML.
   """
   bioHTML: HTML!
-
   """
   The user's public profile company.
   """
   company: String
-
   """
   The user's public profile company as HTML.
   """
   companyHTML: HTML!
-
   """
   Identifies the primary key from the database.
   """
   databaseId: Int
-
   """
   The user's publicly visible profile email.
   """
   email: String!
-
   id: ID!
-
   """
   The user's public profile location.
   """
   location: String
-
   """
   The username used to login.
   """
   login: String!
-
   """
   The user's public profile name.
   """
   name: String
-
   """
   A list of repositories and gists this profile owner has pinned to their profile
   """
@@ -599,48 +665,39 @@ type User implements Actor & Node & ProfileOwner & RepositoryOwner & UniformReso
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
-
     """
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
-
     """
     Returns the first _n_ elements from the list.
     """
     first: Int
-
     """
     Returns the last _n_ elements from the list.
     """
     last: Int
-
     """
     Filter the types of pinned items that are returned.
     """
     types: [PinnableItemType!]
   ): PinnableItemConnection!
-
   """
   The HTTP path for this user
   """
   resourcePath: URI!
-
   """
   The user's description of what they're currently doing.
   """
   status: UserStatus
-
   """
   The user's Twitter username.
   """
   twitterUsername: String
-
   """
   The HTTP URL for this user
   """
   url: URI!
-
   """
   A URL pointing to the user's public website/blog.
   """
@@ -655,17 +712,14 @@ type UserStatus {
   An emoji summarizing the user's status.
   """
   emoji: String
-
   """
   The status emoji as HTML.
   """
   emojiHTML: HTML
-
   """
   A brief message describing what the user is doing.
   """
   message: String
-
   """
   The user who has this status.
   """
