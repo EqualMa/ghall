@@ -139,7 +139,58 @@
           {
             "name": "forks",
             "description": "A list of forks associated with the gist",
-            "args": [],
+            "args": [
+              {
+                "name": "after",
+                "description": "Returns the elements in the list that come after the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": "Returns the elements in the list that come before the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "Returns the first _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "Returns the last _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Ordering options for gists returned from the connection",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "GistOrder",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -213,9 +264,76 @@
             "deprecationReason": null
           },
           {
+            "name": "stargazerCount",
+            "description": "Returns a count of how many stargazers there are on this object",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stargazers",
             "description": "A list of users who have starred this starrable.",
-            "args": [],
+            "args": [
+              {
+                "name": "after",
+                "description": "Returns the elements in the list that come after the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": "Returns the elements in the list that come before the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "Returns the first _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "Returns the last _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Order for connection",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "StarOrder",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -301,6 +419,74 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "GistOrder",
+        "description": "Ordering options for gist connections",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "direction",
+            "description": "The ordering direction.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrderDirection",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "The field to order repositories by.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "GistOrderField",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "GistOrderField",
+        "description": "Properties by which gist connections can be ordered.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "CREATED_AT",
+            "description": "Order gists by creation time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PUSHED_AT",
+            "description": "Order gists by push time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UPDATED_AT",
+            "description": "Order gists by update time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -399,6 +585,29 @@
             "ofType": null
           }
         ]
+      },
+      {
+        "kind": "ENUM",
+        "name": "OrderDirection",
+        "description": "Possible directions in which to order a list of items when provided an `orderBy` argument.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "ASC",
+            "description": "Specifies an ascending order for a given `orderBy` argument.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DESC",
+            "description": "Specifies a descending order for a given `orderBy` argument.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
       },
       {
         "kind": "OBJECT",
@@ -917,7 +1126,106 @@
           {
             "name": "forks",
             "description": "A list of direct forked repositories.",
-            "args": [],
+            "args": [
+              {
+                "name": "affiliations",
+                "description": "Array of viewer's affiliation options for repositories returned from the\nconnection. For example, OWNER will include only repositories that the\ncurrent viewer owns.",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "RepositoryAffiliation",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": "Returns the elements in the list that come after the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": "Returns the elements in the list that come before the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "Returns the first _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "isLocked",
+                "description": "If non-null, filters repositories according to whether they have been locked",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "Returns the last _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Ordering options for repositories returned from the connection",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "RepositoryOrder",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "ownerAffiliations",
+                "description": "Array of owner's affiliation options for repositories returned from the\nconnection. For example, OWNER will include only repositories that the\norganization or user being viewed owns.",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "RepositoryAffiliation",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": "[OWNER, COLLABORATOR]"
+              },
+              {
+                "name": "privacy",
+                "description": "If non-null, filters repositories according to privacy",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "RepositoryPrivacy",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -1078,9 +1386,76 @@
             "deprecationReason": null
           },
           {
+            "name": "stargazerCount",
+            "description": "Returns a count of how many stargazers there are on this object",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stargazers",
             "description": "A list of users who have starred this starrable.",
-            "args": [],
+            "args": [
+              {
+                "name": "after",
+                "description": "Returns the elements in the list that come after the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": "Returns the elements in the list that come before the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "Returns the first _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "Returns the last _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Order for connection",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "StarOrder",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -1129,6 +1504,35 @@
           }
         ],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "RepositoryAffiliation",
+        "description": "The affiliation of a user to a repository",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "COLLABORATOR",
+            "description": "Repositories that the user has been added to as a collaborator.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ORGANIZATION_MEMBER",
+            "description": "Repositories that the user has access to through being a member of an\norganization. This includes every repository on every team that the user is on.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "OWNER",
+            "description": "Repositories that are owned by the authenticated user.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -1343,6 +1747,86 @@
         ]
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "RepositoryOrder",
+        "description": "Ordering options for repository connections",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "direction",
+            "description": "The ordering direction.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrderDirection",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "The field to order repositories by.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "RepositoryOrderField",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "RepositoryOrderField",
+        "description": "Properties by which repository connections can be ordered.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "CREATED_AT",
+            "description": "Order repositories by creation time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NAME",
+            "description": "Order repositories by name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PUSHED_AT",
+            "description": "Order repositories by push time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "STARGAZERS",
+            "description": "Order repositories by number of stargazers",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UPDATED_AT",
+            "description": "Order repositories by update time",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "INTERFACE",
         "name": "RepositoryOwner",
         "description": "Represents an owner of a Repository.",
@@ -1451,6 +1935,85 @@
         ]
       },
       {
+        "kind": "ENUM",
+        "name": "RepositoryPrivacy",
+        "description": "The privacy of a repository",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "PRIVATE",
+            "description": "Private",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PUBLIC",
+            "description": "Public",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "StarOrder",
+        "description": "Ways in which star connections can be ordered.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "direction",
+            "description": "The direction in which to order nodes.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrderDirection",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "The field in which to order nodes by.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "StarOrderField",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "StarOrderField",
+        "description": "Properties by which star connections can be ordered.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "STARRED_AT",
+            "description": "Allows ordering a list of stars by when they were created.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "StargazerConnection",
         "description": "The connection type for User.",
@@ -1483,9 +2046,76 @@
         "description": "Things that can be starred.",
         "fields": [
           {
+            "name": "stargazerCount",
+            "description": "Returns a count of how many stargazers there are on this object",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stargazers",
             "description": "A list of users who have starred this starrable.",
-            "args": [],
+            "args": [
+              {
+                "name": "after",
+                "description": "Returns the elements in the list that come after the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": "Returns the elements in the list that come before the specified cursor.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "Returns the first _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "Returns the last _n_ elements from the list.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Order for connection",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "StarOrder",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
