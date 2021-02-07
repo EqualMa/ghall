@@ -13,6 +13,10 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
 };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]: Maybe<T[SubKey]> };
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = {
   [X in Exclude<keyof T, K>]?: T[X];
@@ -678,8 +682,9 @@ export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   info: GraphQLResolveInfo,
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}> = (
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (
   obj: T,
+  context: TContext,
   info: GraphQLResolveInfo,
 ) => boolean | Promise<boolean>;
 
@@ -836,7 +841,7 @@ export type GistResolvers<
     RequireFields<GistStargazersArgs, never>
   >;
   url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type GistConnectionResolvers<
@@ -844,7 +849,7 @@ export type GistConnectionResolvers<
   ParentType extends ResolversParentTypes["GistConnection"] = ResolversParentTypes["GistConnection"]
 > = ResolversObject<{
   totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface GitSshRemoteScalarConfig
@@ -863,7 +868,7 @@ export type LanguageResolvers<
 > = ResolversObject<{
   color: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   name: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type NodeResolvers<
@@ -886,7 +891,7 @@ export type PageInfoResolvers<
     ParentType,
     ContextType
   >;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PinnableItemResolvers<
@@ -912,7 +917,7 @@ export type PinnableItemConnectionResolvers<
   >;
   pageInfo: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
   totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PinnableItemEdgeResolvers<
@@ -925,7 +930,7 @@ export type PinnableItemEdgeResolvers<
     ParentType,
     ContextType
   >;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ProfileOwnerResolvers<
@@ -1005,7 +1010,7 @@ export type RepositoryResolvers<
     RequireFields<RepositoryStargazersArgs, never>
   >;
   url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type RepositoryConnectionResolvers<
@@ -1013,7 +1018,7 @@ export type RepositoryConnectionResolvers<
   ParentType extends ResolversParentTypes["RepositoryConnection"] = ResolversParentTypes["RepositoryConnection"]
 > = ResolversObject<{
   totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type RepositoryInfoResolvers<
@@ -1064,7 +1069,7 @@ export type StargazerConnectionResolvers<
   ParentType extends ResolversParentTypes["StargazerConnection"] = ResolversParentTypes["StargazerConnection"]
 > = ResolversObject<{
   totalCount: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StarrableResolvers<
@@ -1138,7 +1143,7 @@ export type UserResolvers<
   >;
   url: Resolver<ResolversTypes["URI"], ParentType, ContextType>;
   websiteUrl: Resolver<Maybe<ResolversTypes["URI"]>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type UserStatusResolvers<
@@ -1149,7 +1154,7 @@ export type UserStatusResolvers<
   emojiHTML: Resolver<Maybe<ResolversTypes["HTML"]>, ParentType, ContextType>;
   message: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   user: Resolver<ResolversTypes["User"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
@@ -1264,7 +1269,7 @@ export const UserInfoDocument = gql`
  * });
  */
 export function useUserInfoQuery(
-  baseOptions?: Apollo.QueryHookOptions<UserInfoQuery, UserInfoQueryVariables>,
+  baseOptions: Apollo.QueryHookOptions<UserInfoQuery, UserInfoQueryVariables>,
 ) {
   return Apollo.useQuery<UserInfoQuery, UserInfoQueryVariables>(
     UserInfoDocument,
