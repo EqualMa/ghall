@@ -1,12 +1,12 @@
 {
-  "name": "nextjs",
+  "name": "ghall",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "schema:lint": "prettier -w schema.ghack.graphql",
+    "schema:lint": "prettier -w schema.ghall.graphql",
     "schema:gen": "ts-node scripts/update-schema/main && yarn run schema:lint",
     "schema:update": "ts-node scripts/update-schema/main --download && yarn run schema:lint",
     "gen": "graphql-codegen --config codegen.yml"

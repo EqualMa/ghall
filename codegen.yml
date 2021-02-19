@@ -1,5 +1,5 @@
 overwrite: true
-schema: "schema.ghack.graphql"
+schema: "schema.ghall.graphql"
 documents: "src/graphql/**/*.graphql"
 generates:
   src/graphql/generated.ts:

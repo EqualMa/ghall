@@ -8,7 +8,7 @@ import { resolvers } from "../../src/graphql";
 
 const getApolloServerHandler = cached(async () => {
   const schema = await fsp.readFile(
-    path.join(process.cwd(), "schema.ghack.graphql"),
+    path.join(process.cwd(), "schema.ghall.graphql"),
     "utf-8",
   );
   const typeDefs = gq.parse(schema);

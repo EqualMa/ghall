@@ -16,7 +16,7 @@ async function main() {
 
   const ghallSchemaSource = gq.print(ghallSchemaAst);
 
-  await fsp.writeFile("schema.ghack.graphql", ghallSchemaSource);
+  await fsp.writeFile("schema.ghall.graphql", ghallSchemaSource);
 }
 
 main().catch((err) => {
