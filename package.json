@@ -20,7 +20,7 @@
     "graphiql-explorer": "^0.6.2",
     "graphql": "^15.5.0",
     "http-status-codes": "^2.1.2",
-    "next": "10.0.6",
+    "next": "10.0.7",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "yup": "^0.29.3"
