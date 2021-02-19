@@ -33,13 +33,13 @@ export class PaginationOptionsParser {
 
   constructor(
     {
-      args: { first, last, after, before },
+      args: { first = null, last = null, after = null, before = null },
       //
       totalCount,
     }: PaginationOptions,
     field: string,
   ) {
-    if (first === undefined && last === undefined)
+    if (first === null && last === null)
       throw new ApolloError(
         `You must provide a \`first\` or \`last\` value to properly paginate the \`${field}\` connection.`,
         undefined,
@@ -47,7 +47,7 @@ export class PaginationOptionsParser {
           type: "MISSING_PAGINATION_BOUNDARIES",
         },
       );
-    else if (first !== undefined && last !== undefined) {
+    else if (first !== null && last !== null) {
       throw new ApolloError(
         `Passing both \`first\` and \`last\` to paginate the \`${field}\` connection is not supported.`,
       );

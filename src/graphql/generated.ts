@@ -3,10 +3,6 @@ import {
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
-import {
-  UserExtractor,
-  PinnableItemConnectionExtractor,
-} from "../github/crawler";
 import { gql } from "@apollo/client";
 import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
@@ -32,9 +28,9 @@ export type Scalars = {
   /** Git SSH string */
   GitSSHRemote: any;
   /** A string containing HTML code. */
-  HTML: any;
+  HTML: string;
   /** An RFC 3986, RFC 3987, and RFC 6570 (level 4) compliant URI string. */
-  URI: any;
+  URI: string;
 };
 
 /** Represents an object which can take actions on GitHub. Typically a User or Bot. */
@@ -591,21 +587,12 @@ export type ResolversObject<TObject> = WithIndex<TObject>;
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
-export type LegacyStitchingResolver<TResult, TParent, TContext, TArgs> = {
-  fragment: string;
-  resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
-};
-
-export type NewStitchingResolver<TResult, TParent, TContext, TArgs> = {
-  selectionSet: string;
-  resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
-};
-export type StitchingResolver<TResult, TParent, TContext, TArgs> =
-  | LegacyStitchingResolver<TResult, TParent, TContext, TArgs>
-  | NewStitchingResolver<TResult, TParent, TContext, TArgs>;
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
-  | ResolverFn<TResult, TParent, TContext, TArgs>
-  | StitchingResolver<TResult, TParent, TContext, TArgs>;
+export type Resolver<
+  TResult,
+  TParent = {},
+  TContext = {},
+  TArgs = {}
+> = ResolverFn<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -708,7 +695,9 @@ export type ResolversTypes = ResolversObject<{
   Actor: ResolversTypes["User"];
   Int: ResolverTypeWrapper<Scalars["Int"]>;
   String: ResolverTypeWrapper<Scalars["String"]>;
-  Gist: ResolverTypeWrapper<Gist>;
+  Gist: ResolverTypeWrapper<
+    Omit<Gist, "owner"> & { owner: Maybe<ResolversTypes["RepositoryOwner"]> }
+  >;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   GistConnection: ResolverTypeWrapper<GistConnection>;
   GistOrder: GistOrder;
@@ -721,7 +710,9 @@ export type ResolversTypes = ResolversObject<{
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   PinnableItem: ResolversTypes["Gist"] | ResolversTypes["Repository"];
-  PinnableItemConnection: ResolverTypeWrapper<PinnableItemConnectionExtractor>;
+  PinnableItemConnection: ResolverTypeWrapper<
+    import("./auto-resolvers").PinnableItemConnectionInstanceResolver
+  >;
   PinnableItemEdge: ResolverTypeWrapper<
     Omit<PinnableItemEdge, "node"> & {
       node: Maybe<ResolversTypes["PinnableItem"]>;
@@ -730,13 +721,20 @@ export type ResolversTypes = ResolversObject<{
   PinnableItemType: PinnableItemType;
   ProfileOwner: ResolversTypes["User"];
   Query: ResolverTypeWrapper<{}>;
-  Repository: ResolverTypeWrapper<Repository>;
+  Repository: ResolverTypeWrapper<
+    Omit<Repository, "owner" | "parent"> & {
+      owner: ResolversTypes["RepositoryOwner"];
+      parent: Maybe<ResolversTypes["Repository"]>;
+    }
+  >;
   RepositoryAffiliation: RepositoryAffiliation;
   RepositoryConnection: ResolverTypeWrapper<RepositoryConnection>;
   RepositoryInfo: ResolversTypes["Repository"];
   RepositoryOrder: RepositoryOrder;
   RepositoryOrderField: RepositoryOrderField;
-  RepositoryOwner: ResolversTypes["User"];
+  RepositoryOwner: ResolverTypeWrapper<
+    import("./auto-resolvers").RepositoryOwnerInstanceResolver
+  >;
   RepositoryPrivacy: RepositoryPrivacy;
   StarOrder: StarOrder;
   StarOrderField: StarOrderField;
@@ -747,7 +745,7 @@ export type ResolversTypes = ResolversObject<{
     | ResolversTypes["Gist"]
     | ResolversTypes["Repository"]
     | ResolversTypes["User"];
-  User: ResolverTypeWrapper<UserExtractor>;
+  User: ResolverTypeWrapper<import("./auto-resolvers").UserInstanceResolver>;
   UserStatus: ResolverTypeWrapper<
     Omit<UserStatus, "user"> & { user: ResolversTypes["User"] }
   >;
@@ -758,7 +756,9 @@ export type ResolversParentTypes = ResolversObject<{
   Actor: ResolversParentTypes["User"];
   Int: Scalars["Int"];
   String: Scalars["String"];
-  Gist: Gist;
+  Gist: Omit<Gist, "owner"> & {
+    owner: Maybe<ResolversParentTypes["RepositoryOwner"]>;
+  };
   ID: Scalars["ID"];
   GistConnection: GistConnection;
   GistOrder: GistOrder;
@@ -771,17 +771,20 @@ export type ResolversParentTypes = ResolversObject<{
   PinnableItem:
     | ResolversParentTypes["Gist"]
     | ResolversParentTypes["Repository"];
-  PinnableItemConnection: PinnableItemConnectionExtractor;
+  PinnableItemConnection: import("./auto-resolvers").PinnableItemConnectionInstanceResolver;
   PinnableItemEdge: Omit<PinnableItemEdge, "node"> & {
     node: Maybe<ResolversParentTypes["PinnableItem"]>;
   };
   ProfileOwner: ResolversParentTypes["User"];
   Query: {};
-  Repository: Repository;
+  Repository: Omit<Repository, "owner" | "parent"> & {
+    owner: ResolversParentTypes["RepositoryOwner"];
+    parent: Maybe<ResolversParentTypes["Repository"]>;
+  };
   RepositoryConnection: RepositoryConnection;
   RepositoryInfo: ResolversParentTypes["Repository"];
   RepositoryOrder: RepositoryOrder;
-  RepositoryOwner: ResolversParentTypes["User"];
+  RepositoryOwner: import("./auto-resolvers").RepositoryOwnerInstanceResolver;
   StarOrder: StarOrder;
   StargazerConnection: StargazerConnection;
   Starrable: ResolversParentTypes["Gist"] | ResolversParentTypes["Repository"];
@@ -790,7 +793,7 @@ export type ResolversParentTypes = ResolversObject<{
     | ResolversParentTypes["Gist"]
     | ResolversParentTypes["Repository"]
     | ResolversParentTypes["User"];
-  User: UserExtractor;
+  User: import("./auto-resolvers").UserInstanceResolver;
   UserStatus: Omit<UserStatus, "user"> & { user: ResolversParentTypes["User"] };
 }>;
 

@@ -1,30 +1,48 @@
 import { Resolvers } from "./generated";
 import { decodeNodeId } from "../github/id";
-import { UserCrawler } from "../github/crawler/user";
+import { UserExtractor, UserLazyExtractor } from "../github/crawler/user";
+import { pick } from "../util/type-utils";
+import * as AutoResolvers from "./auto-resolvers";
 
-const resolvers: Resolvers = {
+const resolvers: Partial<Resolvers> = {
+  Actor: {
+    __resolveType() {
+      return "User";
+    },
+    ...pick(AutoResolvers.UserAutoResolvers, [
+      "avatarUrl",
+      "login",
+      "resourcePath",
+      "url",
+    ]),
+  },
+  PinnableItemConnection: AutoResolvers.PinnableItemConnectionAutoResolvers,
   Query: {
     user: async (parent, args) => {
       const { login } = args;
-      const e = new UserCrawler(login);
-      return e.getResource();
+      return new UserLazyExtractor(login);
     },
   },
-  User: {
-    avatarUrl: (e, args) => e.getAvatarUrl(args.size),
-    pinnedItems: (e, args) => e.getPinnedItemsConnection(args),
-  },
+  User: AutoResolvers.UserAutoResolvers,
+  RepositoryOwner: AutoResolvers.RepositoryOwnerAutoResolvers,
   Node: {
-    __resolveType: (parent) => {
-      if (parent instanceof UserCrawler) {
+    __resolveType: async (parent, ...params) => {
+      if (parent instanceof UserExtractor) {
         return "User";
       }
-      const { __typename: typeName } = decodeNodeId(parent.id);
+      const parentId: string = await AutoResolvers.resolveField(
+        "id",
+        parent,
+        {},
+        ...params,
+      );
+      const { __typename: typeName } = decodeNodeId(parentId);
       if (typeName !== "Gist")
         throw new Error(`unresolvable Node type: ${typeName}`);
 
       return typeName;
     },
+    id: AutoResolvers.resolverForField("id"),
   },
 };
 

@@ -1,11 +1,13 @@
 import cheerio from "cheerio";
 import {
+  Gist,
   Language,
-  ProfileOwnerPinnedItemsArgs,
   Repository,
+  ResolversParentTypes,
 } from "./graphql/generated";
 import { UserPinnedItemBasicInfo } from "./pinned-items";
 import { tryParseInt } from "./util/parse";
+import { createData } from "./util/type-utils";
 
 type DomExtractor<T = string> = ($: CheerioStatic, dom: CheerioElement) => T;
 
@@ -33,9 +35,10 @@ const extractForkCountFromDom: DomExtractor<number> = ($, dom) => {
   return tryParseInt(str);
 };
 
-const extractForkParentFromDom: DomExtractor<
-  UserPinnedItemBasicInfo["parent"]
-> = () => null;
+// TODO: extract fork parent
+// const extractForkParentFromDom: DomExtractor<
+//   UserPinnedItemBasicInfo["parent"]
+// > = () => null;
 
 const extractLangFromDom: DomExtractor<Required<Language> | null> = (
   $,
@@ -72,24 +75,44 @@ export const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo>
   const name = isGist ? extractGistNameFromUrl(url) ?? "" : cardTitle;
   const description = isGist ? cardTitle : extractDescriptionFromDom($, dom);
 
-  const parent = extractForkParentFromDom($, dom);
+  // const parent = extractForkParentFromDom($, dom);
 
   const elMetaRow =
     $(".pinned-item-list-item-content > *:last-child", dom)[0] ?? dom;
   const starCount: number = extractStarCountFromDom($, elMetaRow);
   const forkCount: number = extractForkCountFromDom($, elMetaRow);
+
+  const commonData = createData<
+    Partial<
+      Pick<
+        ResolversParentTypes["Gist"] & ResolversParentTypes["Repository"],
+        keyof ResolversParentTypes["Gist"] &
+          keyof ResolversParentTypes["Repository"]
+      >
+    >
+  >()({
+    url: url?.toString() ?? "",
+    name,
+    description,
+    stargazerCount: starCount,
+    stargazers: { totalCount: starCount },
+    forks: { totalCount: forkCount },
+    owner: {
+      __resolveType: "User",
+      url: "",
+      avatarUrl: "",
+      id: "",
+      login: "",
+      resourcePath: "",
+    },
+    resourcePath: "", // TODO:
+  });
+
   if (isGist) {
-    const info: UserPinnedItemBasicInfo = {
-      __typename: isGist ? "Gist" : "Repository",
-
-      url: url?.toString() ?? "",
-      name,
-      description,
-
-      stargazers: { totalCount: starCount },
-      forks: { totalCount: forkCount },
-
-      parent,
+    const info: Required<Gist> = {
+      ...commonData,
+      __typename: "Gist",
+      id: "", //TODO:
     };
     return info;
   } else {
@@ -98,22 +121,15 @@ export const extractUserPinnedItemFromDom: DomExtractor<UserPinnedItemBasicInfo>
 
     const info: Required<Repository> = {
       __typename: "Repository",
-
-      url: url?.toString() ?? "",
-      name,
-      description,
-
-      descriptionHTML,
+      descriptionHTML: "", // TODO:
+      shortDescriptionHTML: "", // TODO:
+      nameWithOwner: "", // TODO:
+      sshUrl: "", // TODO:
       forkCount,
-      homepageUrl,
-      isFork,
-
-      stargazers: { totalCount: starCount },
-      forks: { totalCount: forkCount },
-
-      parent,
-
+      isFork: false,
+      parent: null, // TODO:
       primaryLanguage,
+      ...commonData,
     };
     return info;
   }
@@ -135,11 +151,4 @@ export function extractUserPinnedItemsFromCheerio(
   ).toArray();
 
   return elms.map((elm) => extractUserPinnedItemFromDom($, elm));
-}
-
-export function filterUserPinnedItemsCheerio(
-  $els: Cheerio,
-  pinnableItemTypes?: ProfileOwnerPinnedItemsArgs["types"],
-): Cheerio {
-  return $els.filter();
 }

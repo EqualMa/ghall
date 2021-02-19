@@ -19,3 +19,18 @@ export type Common<T> = RemoveNeverFields<
       : never;
   }
 >;
+
+export function pick<T, F extends (keyof T)[]>(
+  obj: T,
+  fields: F,
+): Pick<T, F[number]> {
+  return Object.fromEntries(fields.map((f) => [f, obj[f]])) as never;
+}
+
+export function identity<T>(data: T): T {
+  return data;
+}
+
+export function createData<T>(): <D extends T>(data: D) => D {
+  return identity;
+}

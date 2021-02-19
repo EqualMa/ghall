@@ -1,6 +1,7 @@
 import {
   PinnableItem,
   PinnableItemEdge,
+  PinnableItemType,
   ProfileOwnerPinnedItemsArgs,
 } from "../../../graphql/generated";
 import {
@@ -8,54 +9,37 @@ import {
   PageInfoFull,
   PaginationOptionsParser,
 } from "../../pagination";
-import { CheerioExtractor } from "../web-crawler";
-import {
-  extractUserPinnedItemFromDom,
-  filterUserPinnedItemsCheerio,
-} from "../../../extract-pinned-item";
-import { memoizeWithThis } from "../../../memo";
+import { extractUserPinnedItemFromDom } from "../../../extract-pinned-item";
+import { cacheOwnGetters } from "../../../util/cache-getters";
+import { PinnableItemConnectionInstanceResolver } from "../../../graphql/auto-resolvers";
 
-export const nodes = memoizeWithThis(function (
-  this: PinnableItemConnectionExtractor,
-): Required<PinnableItem>[] {
-  const [gt, lte] = this.pagination.range;
-  const $els = this.$els.toArray().slice(gt + 1, lte + 1);
-  return $els.map((el) => extractUserPinnedItemFromDom(this.$, el));
-});
-
-export const edges = memoizeWithThis(function (
-  this: PinnableItemConnectionExtractor,
-): Required<PinnableItemEdge>[] {
-  return this.nodes.map(
-    (node, i): Required<PinnableItemEdge> => ({
-      __typename: "PinnableItemEdge",
-      cursor: numberToCursor(i + 1),
-      node,
-    }),
-  );
-});
-
-export class PinnableItemConnectionExtractor extends CheerioExtractor {
+export class PinnableItemConnectionExtractor
+  implements PinnableItemConnectionInstanceResolver {
   public readonly pagination: PaginationOptionsParser;
+  private _allNodesOfTypes: Required<PinnableItem>[];
 
-  public readonly $els: Cheerio;
-  get totalCount(): number {
-    return this.$els.length;
-  }
+  public totalCount: number;
 
   constructor(
-    $: CheerioStatic,
+    private readonly $: CheerioStatic,
     $els: Cheerio,
     public readonly args: ProfileOwnerPinnedItemsArgs,
   ) {
-    super($);
+    const allNodes = $els
+      .toArray()
+      .map((el) => extractUserPinnedItemFromDom(this.$, el));
+    const types = new Set(args.types);
+    const allNodesOfTypes =
+      types.size > 0
+        ? allNodes.filter((n) => types.has(PinnableItemType[n.__typename]))
+        : allNodes;
 
-    this.$els = filterUserPinnedItemsCheerio($els, args.types);
+    const totalCount = allNodesOfTypes.length;
+    this._allNodesOfTypes = allNodesOfTypes;
+    this.totalCount = totalCount;
+
     this.pagination = new PaginationOptionsParser(
-      {
-        args: this.args,
-        totalCount: this.totalCount,
-      },
+      { args, totalCount },
       "pinnedItems",
     );
   }
@@ -65,10 +49,19 @@ export class PinnableItemConnectionExtractor extends CheerioExtractor {
   }
 
   get nodes(): Required<PinnableItem>[] {
-    return nodes.call(this);
+    const [gt, lte] = this.pagination.range;
+    return this._allNodesOfTypes.slice(gt + 1, lte + 1);
   }
 
   get edges(): Required<PinnableItemEdge>[] {
-    return edges.call(this);
+    return this.nodes.map(
+      (node, i): Required<PinnableItemEdge> => ({
+        __typename: "PinnableItemEdge",
+        cursor: numberToCursor(i + 1),
+        node,
+      }),
+    );
   }
 }
+
+cacheOwnGetters(PinnableItemConnectionExtractor);
