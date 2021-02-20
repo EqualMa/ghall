@@ -1,23 +1,22 @@
-import { Gist, PinnableItem, Repository } from "../../../graphql/generated";
-import { memoizeWithThis } from "../../../memo";
+import {
+  Gist,
+  Repository,
+  ResolversParentTypes,
+} from "../../../graphql/generated";
 import { cacheOwnGetters } from "../../../util/cache-getters";
 import { tryParseInt } from "../../../util/parse";
 import { encodeNodeId } from "../../id";
-import { CheerioExtractor } from "../web-crawler";
-import {
-  RemoveNeverFields,
-  UnionToIntersection,
-  Common,
-} from "../../../util/type-utils";
+import { Common } from "../../../util/type-utils";
 
-export type PinnableItemCommon = Common<Gist | Repository>;
+export type PinnableItemCommon = Common<
+  ResolversParentTypes["Gist"] | ResolversParentTypes["Repository"]
+>;
 
-export class PinnableItemCommonExtractor
-  extends CheerioExtractor
-  implements PinnableItemCommon {
-  constructor($: CheerioStatic, private readonly dom: CheerioElement) {
-    super($);
-  }
+export class PinnableItemCommonExtractor implements PinnableItemCommon {
+  constructor(
+    private readonly $: CheerioStatic,
+    private readonly dom: CheerioElement,
+  ) {}
 
   private get $elTitleAnchor() {
     return this.$(
@@ -60,6 +59,10 @@ export class PinnableItemCommonExtractor
     return { totalCount: num };
   }
 
+  get stargazerCount() {
+    return this.stargazers.totalCount;
+  }
+
   get resourcePath(): PinnableItemCommon["resourcePath"] {
     return this.urlObj?.pathname ?? "";
   }
@@ -83,54 +86,72 @@ export class PinnableItemCommonExtractor
 
     Reflect.setPrototypeOf(this, clazz.prototype);
 
-    return this;
-  }
-
-  get forks(): Common<PinnableItem["forks"]> {
-    return {
-      totalCount,
-    };
-  }
-
-  get owner(): PinnableItem["owner"] {
-    return {};
+    return this as never;
   }
 }
 cacheOwnGetters(PinnableItemCommonExtractor.prototype);
 
-class PinnableGistExtractor
+type GistParentType = Required<ResolversParentTypes["Gist"]>;
+export class PinnableGistExtractor
   extends PinnableItemCommonExtractor
-  implements Gist {
+  implements GistParentType {
+  __typename = "Gist" as const;
+
   get id(): Gist["id"] {
     return encodeNodeId({ __typename: "Gist", value: this.name });
+  }
+
+  get forks(): GistParentType["forks"] {
+    throw new Error("Not implemented");
+  }
+  get owner(): GistParentType["owner"] {
+    throw new Error("Not implemented");
   }
 }
 
 cacheOwnGetters(PinnableGistExtractor.prototype);
 
-class PinnableRepositoryExtractor
+type RepositoryParentType = Required<ResolversParentTypes["Repository"]>;
+
+export class PinnableRepositoryExtractor
   extends PinnableItemCommonExtractor
-  implements Repository {
+  implements RepositoryParentType {
+  __typename = "Repository" as const;
+
   get descriptionHTML(): Repository["descriptionHTML"] {
-    return this.$elDesc.html();
+    return this.$elDesc.html() ?? "";
   }
 
   get nameWithOwner(): Repository["nameWithOwner"] {
     return `${this.owner.login}/${this.name}`;
   }
-  get shortDescriptionHTML(): Repository["shortDescriptionHTML"] {}
+  get shortDescriptionHTML(): Repository["shortDescriptionHTML"] {
+    throw new Error("Not implemented");
+  }
 
+  get forks(): RepositoryParentType["forks"] {
+    throw new Error("Not implemented");
+  }
   get forkCount(): Repository["forkCount"] {
     return this.forks.totalCount;
   }
 
-  get isFork(): Repository["isFork"] {}
+  get isFork(): Repository["isFork"] {
+    throw new Error("Not implemented");
+  }
 
-  get owner(): Repository["owner"] {
-    const o = this.owner;
-    if (!o) throw new Error("invalid null owner");
+  get owner(): RepositoryParentType["owner"] {
+    throw new Error("Not implemented");
+  }
 
-    return o;
+  get parent(): RepositoryParentType["parent"] {
+    throw new Error("Not implemented");
+  }
+  get primaryLanguage(): Repository["primaryLanguage"] {
+    throw new Error("Not implemented");
+  }
+  get sshUrl(): Repository["sshUrl"] {
+    throw new Error("Not implemented");
   }
 }
 cacheOwnGetters(PinnableRepositoryExtractor.prototype);

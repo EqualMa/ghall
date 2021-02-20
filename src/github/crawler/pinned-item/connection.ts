@@ -1,22 +1,28 @@
 import {
-  PinnableItem,
-  PinnableItemEdge,
   PinnableItemType,
   ProfileOwnerPinnedItemsArgs,
+  ResolversTypes,
 } from "../../../graphql/generated";
 import {
   numberToCursor,
   PageInfoFull,
   PaginationOptionsParser,
 } from "../../pagination";
-import { extractUserPinnedItemFromDom } from "../../../extract-pinned-item";
 import { cacheOwnGetters } from "../../../util/cache-getters";
 import { PinnableItemConnectionInstanceResolver } from "../../../graphql/auto-resolvers";
+import {
+  PinnableGistExtractor,
+  PinnableItemCommonExtractor,
+  PinnableRepositoryExtractor,
+} from "./item";
 
 export class PinnableItemConnectionExtractor
   implements PinnableItemConnectionInstanceResolver {
   public readonly pagination: PaginationOptionsParser;
-  private _allNodesOfTypes: Required<PinnableItem>[];
+  private _allNodesOfTypes: (
+    | PinnableRepositoryExtractor
+    | PinnableGistExtractor
+  )[];
 
   public totalCount: number;
 
@@ -27,7 +33,9 @@ export class PinnableItemConnectionExtractor
   ) {
     const allNodes = $els
       .toArray()
-      .map((el) => extractUserPinnedItemFromDom(this.$, el));
+      .map((el) =>
+        new PinnableItemCommonExtractor(this.$, el).asPinnableItem(),
+      );
     const types = new Set(args.types);
     const allNodesOfTypes =
       types.size > 0
@@ -48,19 +56,17 @@ export class PinnableItemConnectionExtractor
     return this.pagination.pageInfo;
   }
 
-  get nodes(): Required<PinnableItem>[] {
+  get nodes(): (PinnableRepositoryExtractor | PinnableGistExtractor)[] {
     const [gt, lte] = this.pagination.range;
     return this._allNodesOfTypes.slice(gt + 1, lte + 1);
   }
 
-  get edges(): Required<PinnableItemEdge>[] {
-    return this.nodes.map(
-      (node, i): Required<PinnableItemEdge> => ({
-        __typename: "PinnableItemEdge",
-        cursor: numberToCursor(i + 1),
-        node,
-      }),
-    );
+  get edges(): PinnableItemConnectionInstanceResolver["edges"] {
+    return this.nodes.map((node, i): ResolversTypes["PinnableItemEdge"] => ({
+      __typename: "PinnableItemEdge",
+      cursor: numberToCursor(i + 1),
+      node,
+    }));
   }
 }
 
