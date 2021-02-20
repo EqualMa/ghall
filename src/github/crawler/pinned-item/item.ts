@@ -7,6 +7,7 @@ import { cacheOwnGetters } from "../../../util/cache-getters";
 import { tryParseInt } from "../../../util/parse";
 import { encodeNodeId } from "../../id";
 import { Common } from "../../../util/type-utils";
+import { UserExtractor, UserLazyExtractorWithPreloaded } from "../user";
 
 export type PinnableItemCommon = Common<
   ResolversParentTypes["Gist"] | ResolversParentTypes["Repository"]
@@ -16,6 +17,7 @@ export class PinnableItemCommonExtractor implements PinnableItemCommon {
   constructor(
     protected readonly $: CheerioStatic,
     protected readonly dom: CheerioElement,
+    protected readonly rootOwner: UserExtractor,
   ) {}
 
   private get $elTitleAnchor() {
@@ -79,14 +81,35 @@ export class PinnableItemCommonExtractor implements PinnableItemCommon {
     }
   }
 
+  protected get ownerLogin(): string {
+    return (
+      this.$("span.owner[title]", this.$elTitleAnchor).attr("title") ??
+      this.rootOwner.login
+    );
+  }
+
+  get forkCount(): number {
+    const str = this.$(
+      ".pinned-item-meta > svg.octicon.octicon-repo-forked",
+      this.dom,
+    )
+      .parent()
+      .text();
+    return tryParseInt(str);
+  }
+
+  get owner(): ResolversParentTypes["RepositoryOwner"] {
+    return this.ownerLogin === this.rootOwner.login
+      ? this.rootOwner
+      : new UserLazyExtractorWithPreloaded(this.ownerLogin);
+  }
+
   public asPinnableItem(): PinnableGistExtractor | PinnableRepositoryExtractor {
     const clazz = this.isGist
       ? PinnableGistExtractor
       : PinnableRepositoryExtractor;
 
-    Reflect.setPrototypeOf(this, clazz.prototype);
-
-    return this as never;
+    return new clazz(this.$, this.dom, this.rootOwner);
   }
 }
 cacheOwnGetters(PinnableItemCommonExtractor.prototype);
@@ -102,10 +125,10 @@ export class PinnableGistExtractor
   }
 
   get forks(): GistParentType["forks"] {
-    throw new Error("Not implemented");
-  }
-  get owner(): GistParentType["owner"] {
-    throw new Error("Not implemented");
+    return {
+      __typename: "GistConnection",
+      totalCount: this.forkCount,
+    };
   }
 }
 
@@ -123,7 +146,7 @@ export class PinnableRepositoryExtractor
   }
 
   get nameWithOwner(): Repository["nameWithOwner"] {
-    return `${this.owner.login}/${this.name}`;
+    return `${this.ownerLogin}/${this.name}`;
   }
   get shortDescriptionHTML(): Repository["shortDescriptionHTML"] {
     throw new Error("Not implemented");
@@ -135,21 +158,8 @@ export class PinnableRepositoryExtractor
       totalCount: this.forkCount,
     };
   }
-  get forkCount(): Repository["forkCount"] {
-    const str = this.$(
-      ".pinned-item-meta > svg.octicon.octicon-repo-forked",
-      this.dom,
-    )
-      .parent()
-      .text();
-    return tryParseInt(str);
-  }
 
   get isFork(): Repository["isFork"] {
-    throw new Error("Not implemented");
-  }
-
-  get owner(): RepositoryParentType["owner"] {
     throw new Error("Not implemented");
   }
 

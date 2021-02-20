@@ -16,6 +16,8 @@ import {
 } from "../../graphql/auto-resolvers";
 
 export class UserExtractor implements UserInstanceResolver {
+  __resolveType = "User" as const;
+
   constructor(
     private readonly $: CheerioStatic,
     public readonly login: string,
@@ -27,13 +29,18 @@ export class UserExtractor implements UserInstanceResolver {
   }
 
   pinnedItems(args: RequireFields<UserPinnedItemsArgs, never>) {
-    return new PinnableItemConnectionExtractor(this.$, this.$pinnedItemsEls, {
-      after: args.after ?? null,
-      before: args.before ?? null,
-      first: args.first ?? null,
-      last: args.last ?? null,
-      types: args.types ?? null,
-    });
+    return new PinnableItemConnectionExtractor(
+      this.$,
+      this.$pinnedItemsEls,
+      {
+        after: args.after ?? null,
+        before: args.before ?? null,
+        first: args.first ?? null,
+        last: args.last ?? null,
+        types: args.types ?? null,
+      },
+      this,
+    );
   }
 
   get resourcePath() {
@@ -188,8 +195,24 @@ export class UserLazyExtractor extends UserInstanceResolverProxy {
 }
 
 export class UserLazyExtractorWithPreloaded extends UserLazyExtractor {
+  // TODO: remove after RepositoryOwnerExtractor implemented
+  __resolveType = "User" as const;
+
+  #login: string;
   constructor(login: string) {
     super(login);
+    this.#login = login;
   }
-  // TODO:
+
+  login() {
+    return Promise.resolve(this.#login);
+  }
+
+  resourcePath() {
+    return Promise.resolve(ghUserResUrl(this.#login));
+  }
+
+  url() {
+    return Promise.resolve(ghUserUrl(this.#login));
+  }
 }

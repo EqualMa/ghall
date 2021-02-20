@@ -15,6 +15,7 @@ import {
   PinnableItemCommonExtractor,
   PinnableRepositoryExtractor,
 } from "./item";
+import { UserExtractor } from "../user";
 
 export class PinnableItemConnectionExtractor
   implements PinnableItemConnectionInstanceResolver {
@@ -30,11 +31,16 @@ export class PinnableItemConnectionExtractor
     private readonly $: CheerioStatic,
     $els: Cheerio,
     public readonly args: ProfileOwnerPinnedItemsArgs,
+    protected readonly rootOwner: UserExtractor,
   ) {
     const allNodes = $els
       .toArray()
       .map((el) =>
-        new PinnableItemCommonExtractor(this.$, el).asPinnableItem(),
+        new PinnableItemCommonExtractor(
+          this.$,
+          el,
+          this.rootOwner,
+        ).asPinnableItem(),
       );
     const types = new Set(args.types);
     const allNodesOfTypes =

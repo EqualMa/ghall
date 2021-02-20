@@ -16,6 +16,13 @@ const resolvers: Partial<Resolvers> = {
       "url",
     ]),
   },
+  PinnableItem: {
+    __resolveType(parent) {
+      const t = parent.__typename;
+      if (!t) throw new Error("__typename is not available");
+      return t;
+    },
+  },
   PinnableItemConnection: AutoResolvers.PinnableItemConnectionAutoResolvers,
   Query: {
     user: async (parent, args) => {
