@@ -1,20 +1,17 @@
 import { promises as fsp } from "fs";
 import * as path from "path";
-import { gql, ApolloServer } from "apollo-server-micro";
+import { ApolloServer } from "apollo-server-micro";
+import * as gq from "graphql";
 import { NextApiRequest, NextApiResponse } from "next";
 import { cached } from "../../src/cached";
 import { resolvers } from "../../src/graphql";
 
-function getArgs<T extends unknown[]>(...args: T) {
-  return args;
-}
-
 const getApolloServerHandler = cached(async () => {
   const schema = await fsp.readFile(
-    path.join(process.cwd(), "schema.ghack.graphql"),
+    path.join(process.cwd(), "schema.ghall.graphql"),
     "utf-8",
   );
-  const typeDefs = gql(...getArgs`${schema}`);
+  const typeDefs = gq.parse(schema);
 
   const server = new ApolloServer({
     typeDefs,

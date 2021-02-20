@@ -1,13 +1,20 @@
 overwrite: true
-schema: "schema.ghack.graphql"
+schema: "schema.ghall.graphql"
 documents: "src/graphql/**/*.graphql"
 generates:
   src/graphql/generated.ts:
     config:
       # https://graphql-code-generator.com/docs/plugins/typescript-resolvers#integration-with-apollo-server
       useIndexSignature: true
+      avoidOptionals: true
+      noSchemaStitching: true
+      scalars:
+        HTML: string
+        URI: string
       mappers:
-        User: ../github/crawler#UserExtractor
+        User: import("./auto-resolvers").UserInstanceResolver
+        PinnableItemConnection: import("./auto-resolvers").PinnableItemConnectionInstanceResolver
+        RepositoryOwner: import("./auto-resolvers").RepositoryOwnerInstanceResolver
     plugins:
       - "typescript"
       - "typescript-operations"
@@ -16,6 +23,15 @@ generates:
   ./graphql.schema.json:
     plugins:
       - "introspection"
+  src/graphql/auto-resolvers.ts:
+    config:
+      generateTypesFor:
+        - User
+        - PinnableItemConnection
+        - RepositoryOwner
+      generatedResolversPath: ./generated
+    plugins:
+      - scripts/auto-resolver-plugin.js
 hooks:
   afterAllFileWrite:
     - prettier --write
