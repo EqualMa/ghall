@@ -14,8 +14,8 @@ export type PinnableItemCommon = Common<
 
 export class PinnableItemCommonExtractor implements PinnableItemCommon {
   constructor(
-    private readonly $: CheerioStatic,
-    private readonly dom: CheerioElement,
+    protected readonly $: CheerioStatic,
+    protected readonly dom: CheerioElement,
   ) {}
 
   private get $elTitleAnchor() {
@@ -25,15 +25,15 @@ export class PinnableItemCommonExtractor implements PinnableItemCommon {
     );
   }
 
-  get urlObj(): URL | null {
+  private get urlObj(): URL | null {
     const href = this.$elTitleAnchor.attr("href");
     const url: URL | null = href ? new URL(href, "https://github.com") : null;
     return url;
   }
-  get isGist(): boolean {
+  private get isGist(): boolean {
     return this.urlObj?.host === "gist.github.com";
   }
-  get cardTitle(): string {
+  private get cardTitle(): string {
     return this.$("span.repo[title]", this.$elTitleAnchor).attr("title") ?? "";
   }
 
@@ -130,10 +130,19 @@ export class PinnableRepositoryExtractor
   }
 
   get forks(): RepositoryParentType["forks"] {
-    throw new Error("Not implemented");
+    return {
+      __typename: "RepositoryConnection",
+      totalCount: this.forkCount,
+    };
   }
   get forkCount(): Repository["forkCount"] {
-    return this.forks.totalCount;
+    const str = this.$(
+      ".pinned-item-meta > svg.octicon.octicon-repo-forked",
+      this.dom,
+    )
+      .parent()
+      .text();
+    return tryParseInt(str);
   }
 
   get isFork(): Repository["isFork"] {
