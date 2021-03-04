@@ -1,5 +1,6 @@
 import Head from "next/head";
 import GraphiQL from "graphiql";
+import "graphiql/graphiql.min.css";
 import styles from "./graphiql.module.css";
 import GraphiQLExplorer from "graphiql-explorer";
 import * as React from "react";
@@ -41,11 +42,7 @@ export default function GraphiQLPage() {
   return (
     <>
       <Head>
-        <link
-          key="graphiql-style"
-          rel="stylesheet"
-          href="https://unpkg.com/graphiql@1.x/graphiql.min.css"
-        />
+        <title>GHall</title>
       </Head>
       <div className={`graphiql-container ${styles["graphiql-wrapper"]}`}>
         <GraphiQLExplorer

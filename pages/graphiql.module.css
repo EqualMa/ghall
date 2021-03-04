@@ -1,7 +1,4 @@
 .graphiql-wrapper {
   height: 100vh;
-}
-
-.graphiql-wrapper > :global(.graphiql-container) * {
-  box-sizing: unset;
+  width: 100vw;
 }
