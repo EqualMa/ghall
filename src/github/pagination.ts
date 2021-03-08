@@ -88,7 +88,7 @@ export class PaginationOptionsParser {
       const totalCount = this.totalCount;
 
       if (isFirst) {
-        const start = after ?? 0;
+        const start = after ?? -1;
         const end =
           typeof before === "undefined"
             ? start + len
@@ -96,11 +96,7 @@ export class PaginationOptionsParser {
         this.#range = [start, end];
       } else {
         const end = before ?? totalCount;
-        const start =
-          typeof after === "undefined"
-            ? end - len
-            : //
-              Math.max(end - len, after);
+        const start = Math.max(end - len - 1, after ?? -1);
         this.#range = [start, end];
       }
     }
